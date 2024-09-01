@@ -1,10 +1,10 @@
-type Suit = 'diamonds' | 'clubs' | 'spades' | 'hearts';
-type CardValue = number | 'J' | 'Q' | 'K' | 'A';
+export type Suit = 'diamonds' | 'clubs' | 'spades' | 'hearts' | 'BACK';
+export type CardValue = number | 'J' | 'Q' | 'K' | 'A';
 
-export interface Deck {
+export type Deck = {
   value: CardValue;
   suit: Suit;
-}
+};
 export const DECK_OF_CARDS: Deck[] = [
   {
     suit: 'hearts',

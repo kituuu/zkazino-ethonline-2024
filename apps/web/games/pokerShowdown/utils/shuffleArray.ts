@@ -1,10 +1,5 @@
-type Suit = 'diamonds' | 'clubs' | 'spades' | 'hearts';
-type CardValue = number | 'J' | 'Q' | 'K' | 'A';
+import { Deck } from '@/games/pokershowdown/utils/deck';
 
-interface Deck {
-  value: CardValue;
-  suit: Suit;
-}
 export default function shuffleArray(deck: Deck[]) {
   // for 1000 turns
   // switch the values of two random cards

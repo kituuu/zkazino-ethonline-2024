@@ -1,10 +1,4 @@
-type Suit = 'diamonds' | 'clubs' | 'spades' | 'hearts';
-type CardValue = number | 'J' | 'Q' | 'K' | 'A';
-
-interface Deck {
-  value: CardValue;
-  suit: Suit;
-}
+import { CardValue, Deck, Suit } from '@/games/pokershowdown/utils/deck';
 
 interface Hand {
   type: HandType;

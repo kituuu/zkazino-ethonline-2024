@@ -1,12 +1,5 @@
+import { CardValue, Suit } from '@/games/pokershowdown/utils/deck';
 import React from 'react';
-
-type Suit = 'diamonds' | 'clubs' | 'spades' | 'hearts' | 'BACK';
-type CardValue = number | 'J' | 'Q' | 'K' | 'A';
-
-interface Deck {
-  value: CardValue;
-  suit: Suit;
-}
 
 function Card({
   value,
