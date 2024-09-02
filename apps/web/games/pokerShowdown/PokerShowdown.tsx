@@ -13,8 +13,7 @@ import { useSessionKeyStore } from '@/lib/stores/sessionKeyStorage';
 import {
   ClientAppChain,
   PENDING_BLOCKS_NUM_CONST,
-  RandzuField,
-  WinWitness,
+  PokerCards
 } from 'zknoid-chain-dev';
 import GamePage from '@/components/framework/GamePage';
 import ZkNoidGameContext from '@/lib/contexts/ZkNoidGameContext';
@@ -54,6 +53,9 @@ import { type PendingTransaction } from '@proto-kit/sequencer';
 import Game from '@/components/pages/Poker/game/Game';
 import { pokerShowdownConfig } from './config';
 import RulesAccordion from './ui/RulesAccordion';
+import { Poker } from '../poker/Poker';
+import { GameInfo } from 'zknoid-chain-dev/dist/src/randzu/RandzuLogic';
+import { Deck, getCards } from './utils/deck';
 
 const competition = {
   id: 'global',
@@ -109,7 +111,10 @@ export default function PokerShowdown({
   const lobbiesStore = useLobbiesStore();
 
   console.log('Active lobby', lobbiesStore.activeLobby);
-
+  if(matchQueue.gameInfo != undefined) {
+    console.log("THI", matchQueue.gameInfo?.gameId);
+    console.log('is query working', query?.gameFund.get(UInt64.from(matchQueue.gameInfo?.gameId)))
+  }
   const restart = () => {
     matchQueue.resetLastGameState();
     setGameState(GameState.NotStarted);
@@ -136,6 +141,27 @@ export default function PokerShowdown({
 
     console.log('Tx sent', tx);
   };
+
+  // const getAllCards = async () => {
+  //   const randzuLogic = client.runtime.resolve('RandzuLogic');
+
+  //   const tx = await client.transaction(
+  //     PublicKey.fromBase58(networkStore.address!),
+  //     async () => {
+  //       randzuLogic.getAllCard(
+  //         UInt64.from(matchQueue.gameInfo!.gameId)
+  //       );
+  //     }
+  //   );
+
+  //   await tx.sign();
+  //   await tx.send();
+
+  //   console.log('>>>>>>>>>>>>>>>>>>12345Tx sent', tx);
+
+  // }
+
+  
 
   // nonSSR
   const proveOpponentTimeout = async () => {
@@ -257,6 +283,8 @@ export default function PokerShowdown({
       else if (matchQueue.lastGameState == 'lost') setGameState(GameState.Lost);
       else setGameState(GameState.NotStarted);
     }
+
+    
   }, [
     matchQueue.activeGameId,
     matchQueue.gameInfo,
@@ -305,6 +333,27 @@ export default function PokerShowdown({
       );
   }, [gameState]);
 
+  interface Card {
+    suit: number;
+    rank: number;
+  }
+
+
+  const cardToValue = (card: any) => {
+    return `suit: ${card.suit.toString()}, rank: ${card.rank.toString()}`;
+  }
+
+  // console.log(">>>>>>>>>>>>", formatPubkey(matchQueue.gameInfo?.player2));
+  // console.log(">>>>>1234", matchQueue.gameInfo?.player1Deck);
+  const player1Cards = matchQueue.gameInfo?.field.player1Cards;
+  const player2Cards = matchQueue.gameInfo?.field.player2Cards;
+  const houseCards = matchQueue.gameInfo?.field.houseCards;
+
+  console.log(">>>>>>>>>>>>12345", getCards(player1Cards));
+  console.log(">>>>>>>>>>>>123456", getCards(player2Cards));
+  console.log(">>>>>>>>>>>>1234567", getCards(houseCards));
+
+
   return (
     <GamePage gameConfig={pokerShowdownConfig} defaultPage={'Game'}>
       <motion.div
@@ -327,6 +376,7 @@ export default function PokerShowdown({
           >
             <span>Your opponent:</span>
             <span>{formatPubkey(matchQueue.gameInfo?.opponent)}</span>
+            
           </div>
           {mainButtonState == MainButtonState.YourTurn && (
             <Button

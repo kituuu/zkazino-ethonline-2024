@@ -1,10 +1,17 @@
-export type Suit = 'diamonds' | 'clubs' | 'spades' | 'hearts' | 'BACK';
-export type CardValue = number | 'J' | 'Q' | 'K' | 'A';
+import { UInt64 } from "@proto-kit/library";
+import { Card as backendCard } from "zknoid-chain-dev";
 
-export type Deck = {
+type Suit = 'diamonds' | 'clubs' | 'spades' | 'hearts';
+type CardValue = number | 'J' | 'Q' | 'K' | 'A';
+
+
+
+export interface Deck {
   value: CardValue;
   suit: Suit;
-};
+}
+
+
 export const DECK_OF_CARDS: Deck[] = [
   {
     suit: 'hearts',
@@ -215,3 +222,47 @@ export const DECK_OF_CARDS: Deck[] = [
     value: 'A',
   },
 ];
+
+export const cardToDeck = (card: backendCard): Deck | null => {
+  if (!card) {
+    return null;
+  }
+  const [suitNum, valueNum] = [card.suit?.toString(), card.rank?.toString()];
+   const suitnumTosuit : {
+    [key: string]: Suit;
+   } = {
+    1: 'hearts',
+    2: 'diamonds',
+    3: 'clubs',
+    4: 'spades',
+   } 
+   const valuenumToValue : {
+    [key: string]: CardValue;
+   } = {
+
+    1: 2,
+    2: 3,
+    3: 4,
+    4: 5,
+    5: 6,
+    6: 7,
+    7: 8,
+    8: 9,
+    9: 10,
+    10: 'J',
+    11: 'Q',
+    12: 'K',
+    13: 'A',
+   }
+
+
+   return {
+    suit: suitnumTosuit[suitNum],
+    value: valuenumToValue[valueNum],
+   }
+}
+
+export const getCards = (cards: backendCard[]): (Deck|null)[] => {
+  return cards?.map(cardToDeck);
+}
+
