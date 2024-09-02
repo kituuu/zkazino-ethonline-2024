@@ -1,6 +1,6 @@
-import { CardValue, Deck, Suit } from '@/games/pokershowdown/utils/deck';
+import { Deck, Suit } from '@/games/pokershowdown/utils/deck';
 
-interface Hand {
+export interface Hand {
   type: HandType;
   primary?: number;
   secondary?: number;

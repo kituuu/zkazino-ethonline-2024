@@ -114,8 +114,18 @@ export default function PokerShowdown({
 
   // nonSSR
 
-  const incrementPot = async (value: bigint) => {
+  const incrementPot = async (from: PublicKey, amount?: number) => {
     // TODO -> do magix
+    if (!amount) {
+      // do something
+      return;
+    }
+    let inc = amount;
+    if (matchQueue.gameInfo.field.numberOfTurns % 2 !== 0) {
+      // Do something
+      inc = amount - matchQueue.gameInfo.field.increment;
+    }
+    // direct handler function here
   };
 
   const collectPending = async () => {
@@ -243,14 +253,14 @@ export default function PokerShowdown({
       );
   }, [gameState]);
 
-  interface Card {
-    suit: number;
-    rank: number;
-  }
+  // interface Card {
+  //   suit: number;
+  //   rank: number;
+  // }
 
-  const cardToValue = (card: any) => {
-    return `suit: ${card.suit.toString()}, rank: ${card.rank.toString()}`;
-  };
+  // const cardToValue = (card: any) => {
+  //   return `suit: ${card.suit.toString()}, rank: ${card.rank.toString()}`;
+  // };
 
   // console.log(">>>>>>>>>>>>", formatPubkey(matchQueue.gameInfo?.player2));
   // console.log(">>>>>1234", matchQueue.gameInfo?.player1Deck);
@@ -534,6 +544,7 @@ export default function PokerShowdown({
             <Game
               gameInfo={matchQueue.gameInfo}
               matchInfo={matchQueue}
+              superIncrement={incrementPot}
               // onCellClicked={onCellClicked}
 
               // loadingElement={loadingElement}

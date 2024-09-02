@@ -111,12 +111,16 @@ export class PokerCards extends Struct({
   player1Cards: Provable.Array(Card, 2),
   player2Cards: Provable.Array(Card, 2),
   houseCards: Provable.Array(Card, 5),
+  numberOfTurns: UInt64,
+  increment: UInt64,
 }) {
   static from(player1Cards: Card[], player2Cards: Card[], houseCards: Card[]) {
     return new PokerCards({
       player1Cards: player1Cards,
       player2Cards: player2Cards,
       houseCards: houseCards,
+      numberOfTurns: new UInt64(0),
+      increment: new UInt64(10),
     });
   }
 }

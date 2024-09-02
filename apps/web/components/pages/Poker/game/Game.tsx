@@ -5,6 +5,12 @@ import { Deck, getCards } from '@/games/pokershowdown/utils/deck';
 import RaiseModal from './RaiseModal';
 import { IGameInfo, MatchQueueState } from '@/lib/stores/matchQueue';
 import { Card, PokerCards } from 'zknoid-chain-dev';
+import { PublicKey } from 'o1js';
+import {
+  getHand,
+  getWinner,
+  Hand,
+} from '@/games/pokerShowdown/utils/gameFunctions';
 
 // let socket;
 // const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT;
@@ -12,15 +18,15 @@ import { Card, PokerCards } from 'zknoid-chain-dev';
 interface IGameViewProps {
   gameInfo: IGameInfo<PokerCards> | undefined;
   matchInfo: MatchQueueState;
+  superIncrement: (from: PublicKey, amount?: number) => Promise<void>;
   // loadingElement: { x: number; y: number } | undefined;
   // loading: boolean;
 }
 
-const Game = ({ gameInfo, matchInfo }: IGameViewProps) => {
+const Game = ({ gameInfo, matchInfo, superIncrement }: IGameViewProps) => {
   const currentUser = gameInfo?.currentUserIndex == 0 ? 'Player 1' : 'Player 2';
   // Initialize game state
   const [gameOver, setGameOver] = useState<boolean | undefined>();
-  const [winner, setWinner] = useState('');
   const [turn, setTurn] = useState('');
   const [numberOfTurns, setNumberOfTurns] = useState(0);
   const player1Deck: Deck[] = getCards(
@@ -32,9 +38,17 @@ const Game = ({ gameInfo, matchInfo }: IGameViewProps) => {
   const houseDeck: Deck[] = getCards(
     gameInfo?.field.houseCards as Card[]
   ) as Deck[];
+  const [winner, setWinner] = useState(
+    getWinner(
+      'kitu',
+      'alpha',
+      getHand(player1Deck, houseDeck) as Hand,
+      getHand(player2Deck, houseDeck) as Hand
+    )
+  );
   const [player1Chips, setPlayer1Chips] = useState(0);
   const [player2Chips, setPlayer2Chips] = useState(0);
-  const [increment, setIncrement] = useState(0);
+  const [increment, setIncrement] = useState(10);
   const [pot, setPot] = useState(0);
   const [raiseAmount, setRaiseAmount] = useState(0);
   const [player1Name, setPlayer1Name] = useState('Player 1');
@@ -42,21 +56,25 @@ const Game = ({ gameInfo, matchInfo }: IGameViewProps) => {
 
   const [localHand, setLocalHand] = useState('N/A');
 
-  const callHandler = () => {
+  const callHandler = async () => {
     // Handle call/buyin/increment (basically match the previous bet)
+    await superIncrement(gameInfo?.currentMoveUser as PublicKey);
   };
 
-  const raiseHandler = (amount: number) => {
+  const raiseHandler = async (amount: number) => {
     // TODO: add logic for raise transaction
+    await superIncrement(gameInfo?.currentMoveUser as PublicKey, amount);
   };
 
   const foldHandler = () => {
     // Handle fold action -> me surrender
   };
   const [restart, setRestart] = useState(false);
+
   return (
     <div className="game-bg noselect">
       <div className="game-board">
+        asdfasjkdfhgjkasjkdg {winner}
         <Cards
           numberOfTurns={numberOfTurns}
           player1Deck={player1Deck}
@@ -71,7 +89,6 @@ const Game = ({ gameInfo, matchInfo }: IGameViewProps) => {
           player2Name={player2Name}
           winner={winner}
         />
-
         <div className="pot-display">
           <h3>Pot 💰: {pot}</h3>
         </div>
