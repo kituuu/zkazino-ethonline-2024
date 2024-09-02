@@ -46,6 +46,8 @@ export default function Cards({
   }, [numberOfTurns]);
 
   useEffect(() => {
+    console.log('Inside cards');
+    console.log(player1Deck);
     if (currentUser === 'Player 1' && winner === player1Name)
       setP1Heading(`👑 ${player1Name} (You)`);
     else if (currentUser === 'Player 1') setP1Heading(`${player1Name} (You)`);

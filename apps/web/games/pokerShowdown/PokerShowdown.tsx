@@ -1,8 +1,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import { GameView } from './components/GameView';
-import { Int64, PublicKey, UInt32, UInt64 } from 'o1js';
+import { PublicKey, UInt64 } from 'o1js';
 import { useNetworkStore } from '@/lib/stores/network';
 import {
   useObserveRandzuMatchQueue,
@@ -10,24 +9,18 @@ import {
 } from '@/games/pokerShowdown/stores/matchQueue';
 import { useStore } from 'zustand';
 import { useSessionKeyStore } from '@/lib/stores/sessionKeyStorage';
-import {
-  ClientAppChain,
-  PENDING_BLOCKS_NUM_CONST,
-  PokerCards
-} from 'zknoid-chain-dev';
+import { ClientAppChain, PENDING_BLOCKS_NUM_CONST } from 'zknoid-chain-dev';
 import GamePage from '@/components/framework/GamePage';
 import ZkNoidGameContext from '@/lib/contexts/ZkNoidGameContext';
 import { useProtokitChainStore } from '@/lib/stores/protokitChain';
 import { MainButtonState } from '@/components/framework/GamePage/PvPGameView';
 import { api } from '@/trpc/react';
-import { getEnvContext } from '@/lib/envContext';
 import { DEFAULT_PARTICIPATION_FEE } from 'zknoid-chain-dev/dist/src/engine/LobbyManager';
 import { MOVE_TIMEOUT_IN_BLOCKS } from 'zknoid-chain-dev/dist/src/engine/MatchMaker';
 import GameWidget from '@/components/framework/GameWidget';
 import { motion } from 'framer-motion';
 import { formatPubkey } from '@/lib/utils';
 import Button from '@/components/shared/Button';
-import { Competition } from '@/components/framework/GameWidget/ui/Competition';
 import { Currency } from '@/constants/currency';
 import { formatUnits } from '@/lib/unit';
 import znakesImg from '@/public/image/tokens/znakes.svg';
@@ -49,13 +42,9 @@ import {
   useLobbiesStore,
   useObserveLobbiesStore,
 } from '@/lib/stores/lobbiesStore';
-import { type PendingTransaction } from '@proto-kit/sequencer';
 import Game from '@/components/pages/Poker/game/Game';
 import { pokerShowdownConfig } from './config';
 import RulesAccordion from './ui/RulesAccordion';
-import { Poker } from '../poker/Poker';
-import { GameInfo } from 'zknoid-chain-dev/dist/src/randzu/RandzuLogic';
-import { Deck, getCards } from './utils/deck';
 
 const competition = {
   id: 'global',
@@ -111,9 +100,12 @@ export default function PokerShowdown({
   const lobbiesStore = useLobbiesStore();
 
   console.log('Active lobby', lobbiesStore.activeLobby);
-  if(matchQueue.gameInfo != undefined) {
-    console.log("THI", matchQueue.gameInfo?.gameId);
-    console.log('is query working', query?.gameFund.get(UInt64.from(matchQueue.gameInfo?.gameId)))
+  if (matchQueue.gameInfo != undefined) {
+    console.log('THI', matchQueue.gameInfo?.gameId);
+    console.log(
+      'is query working',
+      query?.gameFund.get(UInt64.from(matchQueue.gameInfo?.gameId))
+    );
   }
   const restart = () => {
     matchQueue.resetLastGameState();
@@ -121,6 +113,11 @@ export default function PokerShowdown({
   };
 
   // nonSSR
+
+  const incrementPot = async (value: bigint) => {
+    // TODO -> do magix
+  };
+
   const collectPending = async () => {
     const randzuLogic = client.runtime.resolve('RandzuLogic');
 
@@ -142,27 +139,6 @@ export default function PokerShowdown({
     console.log('Tx sent', tx);
   };
 
-  // const getAllCards = async () => {
-  //   const randzuLogic = client.runtime.resolve('RandzuLogic');
-
-  //   const tx = await client.transaction(
-  //     PublicKey.fromBase58(networkStore.address!),
-  //     async () => {
-  //       randzuLogic.getAllCard(
-  //         UInt64.from(matchQueue.gameInfo!.gameId)
-  //       );
-  //     }
-  //   );
-
-  //   await tx.sign();
-  //   await tx.send();
-
-  //   console.log('>>>>>>>>>>>>>>>>>>12345Tx sent', tx);
-
-  // }
-
-  
-
   // nonSSR
   const proveOpponentTimeout = async () => {
     const randzuLogic = client.runtime.resolve('RandzuLogic');
@@ -179,70 +155,6 @@ export default function PokerShowdown({
     await tx.sign();
     await tx.send();
   };
-
-  // nonSSR
-  // const onCellClicked = async (x: number, y: number) => {
-  //   if (!matchQueue.gameInfo?.isCurrentUserMove) return;
-  //   if (matchQueue.gameInfo.field.value[y][x] != 0) return;
-  //   console.log('After checks');
-
-  //   const currentUserId = matchQueue.gameInfo.currentUserIndex + 1;
-
-  //   const updatedField = (matchQueue.gameInfo.field as RandzuField).value.map(
-  //     (x: UInt32[]) => x.map((x) => x.toBigint())
-  //   );
-
-  //   updatedField[y][x] = matchQueue.gameInfo.currentUserIndex + 1;
-  //   // updatedField[x][y] = matchQueue.gameInfo.currentUserIndex + 1;
-
-  //   const randzuLogic = client.runtime.resolve('RandzuLogic');
-
-  //   const updatedRandzuField = RandzuField.from(updatedField);
-
-  //   const winWitness1 = updatedRandzuField.checkWin(currentUserId);
-
-  //   const tx = await client.transaction(
-  //     sessionPrivateKey.toPublicKey(),
-  //     async () => {
-  //       randzuLogic.makeMove(
-  //         UInt64.from(matchQueue.gameInfo!.gameId),
-  //         updatedRandzuField,
-  //         winWitness1 ??
-  //           new WinWitness(
-  //             // @ts-ignore
-  //             {
-  //               x: UInt32.from(0),
-  //               y: UInt32.from(0),
-  //               directionX: Int64.from(0),
-  //               directionY: Int64.from(0),
-  //             }
-  //           )
-  //       );
-  //     }
-  //   );
-
-  //   setLoading(true);
-  //   setLoadingElement({
-  //     x,
-  //     y,
-  //   });
-
-  //   tx.transaction = tx.transaction?.sign(sessionPrivateKey);
-  //   await tx.send();
-
-  //   if (winWitness1) {
-  //     await progress.mutateAsync({
-  //       userAddress: networkStore.address!,
-  //       section: 'RANDZU',
-  //       id: 2,
-  //       txHash: JSON.stringify(
-  //         (tx.transaction! as PendingTransaction).toJSON()
-  //       ),
-  //       roomId: competition.id,
-  //       envContext: getEnvContext(),
-  //     });
-  //   }
-  // };
 
   useEffect(() => {
     setLoading(false);
@@ -283,8 +195,6 @@ export default function PokerShowdown({
       else if (matchQueue.lastGameState == 'lost') setGameState(GameState.Lost);
       else setGameState(GameState.NotStarted);
     }
-
-    
   }, [
     matchQueue.activeGameId,
     matchQueue.gameInfo,
@@ -338,21 +248,19 @@ export default function PokerShowdown({
     rank: number;
   }
 
-
   const cardToValue = (card: any) => {
     return `suit: ${card.suit.toString()}, rank: ${card.rank.toString()}`;
-  }
+  };
 
   // console.log(">>>>>>>>>>>>", formatPubkey(matchQueue.gameInfo?.player2));
   // console.log(">>>>>1234", matchQueue.gameInfo?.player1Deck);
-  const player1Cards = matchQueue.gameInfo?.field.player1Cards;
-  const player2Cards = matchQueue.gameInfo?.field.player2Cards;
-  const houseCards = matchQueue.gameInfo?.field.houseCards;
+  // const player1Cards = matchQueue.gameInfo?.field.player1Cards;
+  // const player2Cards = matchQueue.gameInfo?.field.player2Cards;
+  // const houseCards = matchQueue.gameInfo?.field.houseCards;
 
-  console.log(">>>>>>>>>>>>12345", getCards(player1Cards));
-  console.log(">>>>>>>>>>>>123456", getCards(player2Cards));
-  console.log(">>>>>>>>>>>>1234567", getCards(houseCards));
-
+  // console.log('>>>>>>>>>>>>12345', getCards(player1Cards));
+  // console.log('>>>>>>>>>>>>123456', getCards(player2Cards));
+  // console.log('>>>>>>>>>>>>1234567', getCards(houseCards));
 
   return (
     <GamePage gameConfig={pokerShowdownConfig} defaultPage={'Game'}>
@@ -376,7 +284,6 @@ export default function PokerShowdown({
           >
             <span>Your opponent:</span>
             <span>{formatPubkey(matchQueue.gameInfo?.opponent)}</span>
-            
           </div>
           {mainButtonState == MainButtonState.YourTurn && (
             <Button
@@ -629,8 +536,8 @@ export default function PokerShowdown({
               matchInfo={matchQueue}
               // onCellClicked={onCellClicked}
 
-              loadingElement={loadingElement}
-              loading={loading}
+              // loadingElement={loadingElement}
+              // loading={loading}
             />
           )}
         </GameWidget>

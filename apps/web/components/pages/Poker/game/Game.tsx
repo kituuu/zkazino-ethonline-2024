@@ -1,65 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Cards from './Cards';
 
-import { Deck, DECK_OF_CARDS } from '@/games/pokershowdown/utils/deck';
+import { Deck, getCards } from '@/games/pokershowdown/utils/deck';
 import RaiseModal from './RaiseModal';
-import { RandzuField } from 'zknoid-chain-dev';
 import { IGameInfo, MatchQueueState } from '@/lib/stores/matchQueue';
-import shuffleArray from '@/games/pokerShowdown/utils/shuffleArray';
+import { Card, PokerCards } from 'zknoid-chain-dev';
 
 // let socket;
 // const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT;
 
 interface IGameViewProps {
-  gameInfo: IGameInfo<RandzuField> | undefined;
+  gameInfo: IGameInfo<PokerCards> | undefined;
   matchInfo: MatchQueueState;
-  loadingElement: { x: number; y: number } | undefined;
-  loading: boolean;
+  // loadingElement: { x: number; y: number } | undefined;
+  // loading: boolean;
 }
 
-const Game = ({
-  gameInfo,
-  matchInfo,
-  loadingElement,
-  loading,
-}: IGameViewProps) => {
-  //   const router = useRouter();
-  //   const { roomCode } = router.query;
-
-  // Initialize socket state
-  const [room, setRoom] = useState<string | string[] | undefined>(
-    matchInfo.activeGameId.toString()
-  );
-  const [roomFull, setRoomFull] = useState(false);
-  const [users, setUsers] = useState<string[]>([]);
+const Game = ({ gameInfo, matchInfo }: IGameViewProps) => {
   const currentUser = gameInfo?.currentUserIndex == 0 ? 'Player 1' : 'Player 2';
-
   // Initialize game state
   const [gameOver, setGameOver] = useState<boolean | undefined>();
   const [winner, setWinner] = useState('');
   const [turn, setTurn] = useState('');
   const [numberOfTurns, setNumberOfTurns] = useState(0);
-  const [player1Deck, setPlayer1Deck] = useState<Deck[]>([
-    {
-      value: 'Q',
-      suit: 'spades',
-    },
-    {
-      value: 'A',
-      suit: 'clubs',
-    },
-  ]);
-  const [player2Deck, setPlayer2Deck] = useState<Deck[]>([
-    {
-      value: 'Q',
-      suit: 'spades',
-    },
-    {
-      value: 'A',
-      suit: 'clubs',
-    },
-  ]);
-  const [houseDeck, setHouseDeck] = useState<Deck[]>([]);
+  const player1Deck: Deck[] = getCards(
+    gameInfo?.field.player1Cards as Card[]
+  ) as Deck[];
+  const player2Deck: Deck[] = getCards(
+    gameInfo?.field.player2Cards as Card[]
+  ) as Deck[];
+  const houseDeck: Deck[] = getCards(
+    gameInfo?.field.houseCards as Card[]
+  ) as Deck[];
   const [player1Chips, setPlayer1Chips] = useState(0);
   const [player2Chips, setPlayer2Chips] = useState(0);
   const [increment, setIncrement] = useState(0);
@@ -70,63 +42,21 @@ const Game = ({
 
   const [localHand, setLocalHand] = useState('N/A');
 
-  // Game logic useEffect hooks...
-  // (The rest of the useEffect hooks remain largely unchanged,
-  // just remove socket emissions and handle state locally)
-
   const callHandler = () => {
-    // Handle call action
+    // Handle call/buyin/increment (basically match the previous bet)
   };
 
   const raiseHandler = (amount: number) => {
-    // Handle raise action
+    // TODO: add logic for raise transaction
   };
 
   const foldHandler = () => {
-    // Handle fold action
+    // Handle fold action -> me surrender
   };
-
-  // Local state
-  const [shuffledDeck, setShuffledDeck] = useState<Deck[]>([]);
   const [restart, setRestart] = useState(false);
-
-  useEffect(() => {
-    const shuffledCards = shuffleArray(DECK_OF_CARDS);
-    setShuffledDeck(shuffledCards);
-    //extract 2 cards to player1Deck
-    const player1Deck = shuffledCards.splice(0, 2);
-    setPlayer1Deck(player1Deck);
-    //extract 2 cards to player2Deck
-    const player2Deck = shuffledCards.splice(0, 2);
-    setPlayer2Deck(player2Deck);
-
-    //extract 3 cards to houseDeck
-    const houseDeck = shuffledCards.splice(0, 3);
-    setHouseDeck(houseDeck);
-    // Socket connection logic commented out
-    // const connectionOptions = {
-    //     forceNew: true,
-    //     reconnectionAttempts: 'Infinity',
-    //     transports: ['websocket'],
-    // };
-    // socket = io.connect(ENDPOINT, connectionOptions);
-
-    // socket.emit('join', { room: room }, (error: any) => {
-    //     if (error) setRoomFull(true);
-    // });
-
-    // Cleanup on component unmount
-    return () => {
-      // socket.emit('disconnection');
-      // socket.off();
-    };
-  }, [gameInfo?.currentUserIndex]);
   return (
     <div className="game-bg noselect">
       <div className="game-board">
-        <div className="room-code">
-          <h2>Room Code: {room}</h2>
-        </div>
         <Cards
           numberOfTurns={numberOfTurns}
           player1Deck={player1Deck}

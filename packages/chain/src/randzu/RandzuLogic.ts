@@ -16,7 +16,7 @@ import { MatchMaker } from '../engine/MatchMaker';
 import type { QueueListItem } from '../engine/MatchMaker';
 import { UInt64 as ProtoUInt64 } from '@proto-kit/library';
 import { Lobby } from '../engine/LobbyManager';
-import { Deck ,Card  } from './poker';
+import { Deck, Card } from './poker';
 
 // const RANDZU_FIELD_SIZE = 15;
 // const CELLS_LINE_TO_WIN = 5;
@@ -107,13 +107,10 @@ import { Deck ,Card  } from './poker';
 //   }
 // }
 
-
-
-
 export class PokerCards extends Struct({
-  player1Cards: Provable.Array(Card, 2), 
-  player2Cards: Provable.Array(Card, 2), 
-  houseCards: Provable.Array(Card, 5), 
+  player1Cards: Provable.Array(Card, 2),
+  player2Cards: Provable.Array(Card, 2),
+  houseCards: Provable.Array(Card, 5),
 }) {
   static from(player1Cards: Card[], player2Cards: Card[], houseCards: Card[]) {
     return new PokerCards({
@@ -130,7 +127,7 @@ export class GameInfo extends Struct({
   currentMoveUser: PublicKey,
   lastMoveBlockHeight: UInt64,
   winner: PublicKey,
-  field: PokerCards
+  field: PokerCards,
 }) {}
 
 @runtimeModule()
@@ -140,10 +137,12 @@ export class RandzuLogic extends MatchMaker {
 
   @state() public gamesNum = State.from<UInt64>(UInt64);
 
-  public override async initGame(lobby: Lobby, shouldUpdate: Bool): Promise<UInt64> {
+  public override async initGame(
+    lobby: Lobby,
+    shouldUpdate: Bool,
+  ): Promise<UInt64> {
     const currentGameId = lobby.id;
-    const deck:Deck = new Deck();
-    
+    const deck: Deck = new Deck();
 
     // Setting active game if opponent found
     await this.games.set(
@@ -154,7 +153,17 @@ export class RandzuLogic extends MatchMaker {
         currentMoveUser: lobby.players[0],
         lastMoveBlockHeight: this.network.block.height,
         winner: PublicKey.empty(),
-        field: PokerCards.from([deck.dealCard(), deck.dealCard()], [deck.dealCard() , deck.dealCard()] , [deck.dealCard() , deck.dealCard() , deck.dealCard(), deck.dealCard(), deck.dealCard()]),
+        field: PokerCards.from(
+          [deck.dealCard(), deck.dealCard()],
+          [deck.dealCard(), deck.dealCard()],
+          [
+            deck.dealCard(),
+            deck.dealCard(),
+            deck.dealCard(),
+            deck.dealCard(),
+            deck.dealCard(),
+          ],
+        ),
       }),
     );
 
@@ -166,15 +175,16 @@ export class RandzuLogic extends MatchMaker {
     return await super.initGame(lobby, shouldUpdate);
   }
 
-
-
   @runtimeMethod()
   public async proveOpponentTimeout(gameId: UInt64): Promise<void> {
     await super.proveOpponentTimeout(gameId, true);
   }
 
   @runtimeMethod()
-  public async updateGameFund(gameId: UInt64, amount: ProtoUInt64): Promise<void> {
+  public async updateGameFund(
+    gameId: UInt64,
+    amount: ProtoUInt64,
+  ): Promise<void> {
     await this.gameFund.set(
       gameId,
       ProtoUInt64.from((await this.gameFund.get(gameId)).value).add(amount),
@@ -190,153 +200,147 @@ export class RandzuLogic extends MatchMaker {
   //   const game = await this.games.get(gameId);
   //   assert(game.isSome, 'Invalid game id');
 
-
   //   return {
   //     player1Cards: game.value.player1Deck,
   //     player2Cards: game.value.player2Deck,
   //     houseCards: game.value.houseDeck
   //   };
   // }
-    
-  }
+}
 
+// @runtimeMethod()
+// public async makeMove(
+//   gameId: UInt64,
+//   newField: RandzuField,
+//   winWitness: WinWitness,
+// ): Promise<void> {
+//   const sessionSender = await this.sessions.get(this.transaction.sender.value);
+//   const sender = Provable.if(
+//     sessionSender.isSome,
+//     sessionSender.value,
+//     this.transaction.sender.value,
+//   );
 
+//   const game = await this.games.get(gameId);
+//   assert(game.isSome, 'Invalid game id');
+//   assert(game.value.currentMoveUser.equals(sender), `Not your move`);
+//   assert(game.value.winner.equals(PublicKey.empty()), `Game finished`);
 
-  // @runtimeMethod()
-  // public async makeMove(
-  //   gameId: UInt64,
-  //   newField: RandzuField,
-  //   winWitness: WinWitness,
-  // ): Promise<void> {
-  //   const sessionSender = await this.sessions.get(this.transaction.sender.value);
-  //   const sender = Provable.if(
-  //     sessionSender.isSome,
-  //     sessionSender.value,
-  //     this.transaction.sender.value,
-  //   );
+//   winWitness.assertCorrect();
 
-  //   const game = await this.games.get(gameId);
-  //   assert(game.isSome, 'Invalid game id');
-  //   assert(game.value.currentMoveUser.equals(sender), `Not your move`);
-  //   assert(game.value.winner.equals(PublicKey.empty()), `Game finished`);
+//   const winProposed = Bool.and(
+//     winWitness.directionX.equals(UInt32.from(0)),
+//     winWitness.directionY.equals(UInt32.from(0)),
+//   ).not();
 
-  //   winWitness.assertCorrect();
+//   const currentUserId = Provable.if(
+//     game.value.currentMoveUser.equals(game.value.player1),
+//     UInt32.from(1),
+//     UInt32.from(2),
+//   );
 
-  //   const winProposed = Bool.and(
-  //     winWitness.directionX.equals(UInt32.from(0)),
-  //     winWitness.directionY.equals(UInt32.from(0)),
-  //   ).not();
+//   const addedCellsNum = UInt64.from(0);
+//   for (let i = 0; i < RANDZU_FIELD_SIZE; i++) {
+//     for (let j = 0; j < RANDZU_FIELD_SIZE; j++) {
+//       const currentFieldCell = game.value.field.value[i][j];
+//       const nextFieldCell = newField.value[i][j];
 
-  //   const currentUserId = Provable.if(
-  //     game.value.currentMoveUser.equals(game.value.player1),
-  //     UInt32.from(1),
-  //     UInt32.from(2),
-  //   );
+//       assert(
+//         Bool.or(
+//           currentFieldCell.equals(UInt32.from(0)),
+//           currentFieldCell.equals(nextFieldCell),
+//         ),
+//         `Modified filled cell at ${i}, ${j}`,
+//       );
 
-  //   const addedCellsNum = UInt64.from(0);
-  //   for (let i = 0; i < RANDZU_FIELD_SIZE; i++) {
-  //     for (let j = 0; j < RANDZU_FIELD_SIZE; j++) {
-  //       const currentFieldCell = game.value.field.value[i][j];
-  //       const nextFieldCell = newField.value[i][j];
+//       addedCellsNum.add(
+//         Provable.if(
+//           currentFieldCell.equals(nextFieldCell),
+//           UInt64.from(0),
+//           UInt64.from(1),
+//         ),
+//       );
 
-  //       assert(
-  //         Bool.or(
-  //           currentFieldCell.equals(UInt32.from(0)),
-  //           currentFieldCell.equals(nextFieldCell),
-  //         ),
-  //         `Modified filled cell at ${i}, ${j}`,
-  //       );
+//       assert(
+//         addedCellsNum.lessThanOrEqual(UInt64.from(1)),
+//         `Exactly one cell should be added. Error at ${i}, ${j}`,
+//       );
+//       assert(
+//         Provable.if(
+//           currentFieldCell.equals(nextFieldCell),
+//           Bool(true),
+//           nextFieldCell.equals(currentUserId),
+//         ),
+//         'Added opponent`s color',
+//       );
 
-  //       addedCellsNum.add(
-  //         Provable.if(
-  //           currentFieldCell.equals(nextFieldCell),
-  //           UInt64.from(0),
-  //           UInt64.from(1),
-  //         ),
-  //       );
+//       for (let wi = 0; wi < CELLS_LINE_TO_WIN; wi++) {
+//         const winPosX = winWitness.directionX
+//           .mul(UInt32.from(wi))
+//           .add(winWitness.x);
+//         const winPosY = winWitness.directionY
+//           .mul(UInt32.from(wi))
+//           .add(winWitness.y);
+//         assert(
+//           Bool.or(
+//             winProposed.not(),
+//             Provable.if(
+//               Bool.and(
+//                 winPosX.equals(UInt32.from(i)),
+//                 winPosY.equals(UInt32.from(j)),
+//               ),
+//               nextFieldCell.equals(currentUserId),
+//               Bool(true),
+//             ),
+//           ),
+//           'Win not proved',
+//         );
+//       }
+//     }
+//   }
 
-  //       assert(
-  //         addedCellsNum.lessThanOrEqual(UInt64.from(1)),
-  //         `Exactly one cell should be added. Error at ${i}, ${j}`,
-  //       );
-  //       assert(
-  //         Provable.if(
-  //           currentFieldCell.equals(nextFieldCell),
-  //           Bool(true),
-  //           nextFieldCell.equals(currentUserId),
-  //         ),
-  //         'Added opponent`s color',
-  //       );
+//   game.value.winner = Provable.if(
+//     winProposed,
+//     game.value.currentMoveUser,
+//     PublicKey.empty(),
+//   );
 
-  //       for (let wi = 0; wi < CELLS_LINE_TO_WIN; wi++) {
-  //         const winPosX = winWitness.directionX
-  //           .mul(UInt32.from(wi))
-  //           .add(winWitness.x);
-  //         const winPosY = winWitness.directionY
-  //           .mul(UInt32.from(wi))
-  //           .add(winWitness.y);
-  //         assert(
-  //           Bool.or(
-  //             winProposed.not(),
-  //             Provable.if(
-  //               Bool.and(
-  //                 winPosX.equals(UInt32.from(i)),
-  //                 winPosY.equals(UInt32.from(j)),
-  //               ),
-  //               nextFieldCell.equals(currentUserId),
-  //               Bool(true),
-  //             ),
-  //           ),
-  //           'Win not proved',
-  //         );
-  //       }
-  //     }
-  //   }
+//   const winnerShare = ProtoUInt64.from(
+//     Provable.if<ProtoUInt64>(
+//       winProposed,
+//       ProtoUInt64,
+//       ProtoUInt64.from(1),
+//       ProtoUInt64.from(0),
+//     ),
+//   );
 
-  //   game.value.winner = Provable.if(
-  //     winProposed,
-  //     game.value.currentMoveUser,
-  //     PublicKey.empty(),
-  //   );
+//   await this.acquireFunds(
+//     gameId,
+//     game.value.winner,
+//     PublicKey.empty(),
+//     winnerShare,
+//     ProtoUInt64.from(0),
+//     ProtoUInt64.from(1),
+//   );
 
-  //   const winnerShare = ProtoUInt64.from(
-  //     Provable.if<ProtoUInt64>(
-  //       winProposed,
-  //       ProtoUInt64,
-  //       ProtoUInt64.from(1),
-  //       ProtoUInt64.from(0),
-  //     ),
-  //   );
+//   game.value.field = newField;
+//   game.value.currentMoveUser = Provable.if(
+//     game.value.currentMoveUser.equals(game.value.player1),
+//     game.value.player2,
+//     game.value.player1,
+//   );
+//   game.value.lastMoveBlockHeight = this.network.block.height;
+//   await this.games.set(gameId, game.value);
 
-  //   await this.acquireFunds(
-  //     gameId,
-  //     game.value.winner,
-  //     PublicKey.empty(),
-  //     winnerShare,
-  //     ProtoUInt64.from(0),
-  //     ProtoUInt64.from(1),
-  //   );
+//   // Removing active game for players if game ended
+//   await this.activeGameId.set(
+//     Provable.if(winProposed, game.value.player2, PublicKey.empty()),
+//     UInt64.from(0),
+//   );
+//   await this.activeGameId.set(
+//     Provable.if(winProposed, game.value.player1, PublicKey.empty()),
+//     UInt64.from(0),
+//   );
 
-  //   game.value.field = newField;
-  //   game.value.currentMoveUser = Provable.if(
-  //     game.value.currentMoveUser.equals(game.value.player1),
-  //     game.value.player2,
-  //     game.value.player1,
-  //   );
-  //   game.value.lastMoveBlockHeight = this.network.block.height;
-  //   await this.games.set(gameId, game.value);
-
-  //   // Removing active game for players if game ended
-  //   await this.activeGameId.set(
-  //     Provable.if(winProposed, game.value.player2, PublicKey.empty()),
-  //     UInt64.from(0),
-  //   );
-  //   await this.activeGameId.set(
-  //     Provable.if(winProposed, game.value.player1, PublicKey.empty()),
-  //     UInt64.from(0),
-  //   );
-
-  //   await this._onLobbyEnd(gameId, winProposed);
-  // }
-
-
+//   await this._onLobbyEnd(gameId, winProposed);
+// }

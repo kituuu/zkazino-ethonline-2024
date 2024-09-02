@@ -165,12 +165,12 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
   },
 }));
 
-export interface IGameInfo<GameField> {
+export interface IGameInfo<PokerCards> {
   player1: PublicKey;
   player2: PublicKey;
   currentMoveUser: PublicKey;
   winner: PublicKey;
-  field: GameField;
+  field: PokerCards;
   currentUserIndex: 0 | 1;
   isCurrentUserMove: boolean;
   opponent: PublicKey;
