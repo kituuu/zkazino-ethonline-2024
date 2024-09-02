@@ -114,13 +114,19 @@ export class PokerCards extends Struct({
   numberOfTurns: UInt64,
   increment: UInt64,
 }) {
-  static from(player1Cards: Card[], player2Cards: Card[], houseCards: Card[]) {
+  static from(
+    player1Cards: Card[],
+    player2Cards: Card[],
+    houseCards: Card[],
+    numberOfTurns: UInt64,
+    increment: UInt64,
+  ) {
     return new PokerCards({
       player1Cards: player1Cards,
       player2Cards: player2Cards,
       houseCards: houseCards,
-      numberOfTurns: new UInt64(0),
-      increment: new UInt64(10),
+      numberOfTurns: numberOfTurns,
+      increment: increment,
     });
   }
 }
@@ -167,6 +173,8 @@ export class RandzuLogic extends MatchMaker {
             deck.dealCard(),
             deck.dealCard(),
           ],
+          new UInt64(0),
+          new UInt64(10),
         ),
       }),
     );

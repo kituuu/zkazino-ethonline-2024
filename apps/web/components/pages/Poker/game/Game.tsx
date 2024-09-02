@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Cards from './Cards';
 
 import { Deck, getCards } from '@/games/pokershowdown/utils/deck';
@@ -28,24 +28,18 @@ const Game = ({ gameInfo, matchInfo, superIncrement }: IGameViewProps) => {
   // Initialize game state
   const [gameOver, setGameOver] = useState<boolean | undefined>();
   const [turn, setTurn] = useState('');
-  const [numberOfTurns, setNumberOfTurns] = useState(0);
+  const [numberOfTurns, setNumberOfTurns] = useState(6);
   const player1Deck: Deck[] = getCards(
     gameInfo?.field.player1Cards as Card[]
   ) as Deck[];
   const player2Deck: Deck[] = getCards(
     gameInfo?.field.player2Cards as Card[]
   ) as Deck[];
-  const houseDeck: Deck[] = getCards(
+  const saarepatte: Deck[] = getCards(
     gameInfo?.field.houseCards as Card[]
   ) as Deck[];
-  const [winner, setWinner] = useState(
-    getWinner(
-      'kitu',
-      'alpha',
-      getHand(player1Deck, houseDeck) as Hand,
-      getHand(player2Deck, houseDeck) as Hand
-    )
-  );
+  const [houseDeck, setHouseDeck] = useState<Deck[]>(saarepatte.slice(0, 3));
+  const [winner, setWinner] = useState('');
   const [player1Chips, setPlayer1Chips] = useState(0);
   const [player2Chips, setPlayer2Chips] = useState(0);
   const [increment, setIncrement] = useState(10);
@@ -71,6 +65,53 @@ const Game = ({ gameInfo, matchInfo, superIncrement }: IGameViewProps) => {
   };
   const [restart, setRestart] = useState(false);
 
+  useEffect(() => {
+    if (numberOfTurns === 0) {
+      setGameOver(true);
+      setWinner(
+        getWinner(
+          'Player 1',
+          'Player 2',
+          getHand(player1Deck, houseDeck) as Hand,
+          getHand(player2Deck, houseDeck) as Hand
+        )
+      );
+    }
+    if (numberOfTurns === 2) {
+      setIncrement(0);
+      // socket.emit('updateGameState', { increment: 0 });
+      // playShufflingSound();
+    } else if (numberOfTurns === 4) {
+      // socket.emit('updateGameState', {
+      setHouseDeck(saarepatte.slice(0, 4));
+
+      setIncrement(0);
+    } else if (numberOfTurns === 6) {
+      console.log(
+        'madfhajk sdjkfhjkahsjdhf jkdhsjahsdkjf hjkashdfjk hajksdh jkfahskj'
+      );
+      setHouseDeck(saarepatte);
+      setIncrement(0);
+    } else if (numberOfTurns === 8) {
+      setGameOver(true);
+      setWinner(
+        getWinner(
+          'Player 1',
+          'Player 2',
+          getHand(player1Deck, houseDeck) as Hand,
+          getHand(player2Deck, houseDeck) as Hand
+        )
+      );
+    }
+
+    if (!gameOver && currentUser === 'Player 1')
+      setLocalHand(getHand(player1Deck, houseDeck) as string);
+    else if (!gameOver && currentUser === 'Player 2')
+      setLocalHand(getHand(player2Deck, houseDeck) as string);
+  }, [gameInfo?.field.numberOfTurns]);
+  console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<saarepatte');
+  console.log(gameInfo?.field);
+  console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<saarepatte');
   return (
     <div className="game-bg noselect">
       <div className="game-board">

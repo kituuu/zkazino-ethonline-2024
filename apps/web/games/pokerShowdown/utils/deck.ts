@@ -1,7 +1,6 @@
-import { UInt64 } from '@proto-kit/library';
 import { Card as backendCard } from 'zknoid-chain-dev';
 
-export type Suit = 'diamonds' | 'clubs' | 'spades' | 'hearts';
+export type Suit = 'DIAMONDS' | 'CLUBS' | 'SPADES' | 'HEARTS' | 'BACK';
 export type CardValue = number | 'J' | 'Q' | 'K' | 'A';
 
 export interface Deck {
@@ -11,211 +10,211 @@ export interface Deck {
 
 export const DECK_OF_CARDS: Deck[] = [
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 2,
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 3,
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 4,
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 5,
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 6,
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 7,
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 8,
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 9,
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 10,
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 'J',
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 'Q',
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 'K',
   },
   {
-    suit: 'hearts',
+    suit: 'HEARTS',
     value: 'A',
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 2,
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 3,
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 4,
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 5,
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 6,
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 7,
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 8,
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 9,
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 10,
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 'J',
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 'Q',
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 'K',
   },
   {
-    suit: 'diamonds',
+    suit: 'DIAMONDS',
     value: 'A',
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 2,
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 3,
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 4,
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 5,
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 6,
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 7,
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 8,
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 9,
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 10,
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 'J',
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 'Q',
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 'K',
   },
   {
-    suit: 'clubs',
+    suit: 'CLUBS',
     value: 'A',
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 2,
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 3,
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 4,
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 5,
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 6,
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 7,
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 8,
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 9,
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 10,
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 'J',
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 'Q',
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 'K',
   },
   {
-    suit: 'spades',
+    suit: 'SPADES',
     value: 'A',
   },
 ];
@@ -228,10 +227,10 @@ export const cardToDeck = (card: backendCard): Deck | null => {
   const suitnumTosuit: {
     [key: string]: Suit;
   } = {
-    1: 'hearts',
-    2: 'diamonds',
-    3: 'clubs',
-    4: 'spades',
+    1: 'HEARTS',
+    2: 'DIAMONDS',
+    3: 'CLUBS',
+    4: 'SPADES',
   };
   const valuenumToValue: {
     [key: string]: CardValue;

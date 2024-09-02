@@ -1,4 +1,4 @@
-type Suit = 'diamonds' | 'clubs' | 'spades' | 'hearts';
+type Suit = 'DIAMONDS' | 'CLUBS' | 'SPADES' | 'HEARTS';
 type CardValue = number | 'J' | 'Q' | 'K' | 'A';
 
 interface Deck {

@@ -1,6 +1,5 @@
 import { CardValue, Suit } from '@/games/pokershowdown/utils/deck';
 import React from 'react';
-
 function Card({
   value,
   suit,
@@ -16,7 +15,7 @@ function Card({
         <img
           className={className}
           alt={suit + '-' + value}
-          src={`/cards/${suit.toUpperCase()}/${suit.toUpperCase()}_${value}.svg`}
+          src={`/cards/${suit}/${suit}_${value}.svg`}
         />
       )}
       {suit === 'BACK' && (
