@@ -1,4 +1,4 @@
-import { CardValue, Suit } from '@/games/pokershowdown/utils/deck';
+import { CardValue, Suit } from '@/games/pokerShowdown/utils/deck';
 import React from 'react';
 function Card({
   value,

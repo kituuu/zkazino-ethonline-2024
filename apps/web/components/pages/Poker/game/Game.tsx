@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Cards from './Cards';
 
-import { Deck, getCards } from '@/games/pokershowdown/utils/deck';
+import { Deck, getCards } from '@/games/pokerShowdown/utils/deck';
 import RaiseModal from './RaiseModal';
 import { IGameInfo, MatchQueueState } from '@/lib/stores/matchQueue';
 import { Card, PokerCards } from 'zknoid-chain-dev';

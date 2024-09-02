@@ -3,13 +3,13 @@ import { useContext, useEffect } from 'react';
 import { useProtokitChainStore } from '@/lib/stores/protokitChain';
 import { useNetworkStore } from '@/lib/stores/network';
 import ZkNoidGameContext from '@/lib/contexts/ZkNoidGameContext';
-import { randzuConfig } from '../config';
 import { type ClientAppChain } from '@proto-kit/sdk';
 import {
   MatchQueueState,
   matchQueueInitializer,
 } from '@/lib/stores/matchQueue';
 import { create } from 'zustand';
+import { pokerShowdownConfig } from '../config';
 
 export const useRandzuMatchQueueStore = create<
   MatchQueueState,
@@ -23,7 +23,7 @@ export const useObserveRandzuMatchQueue = () => {
   const { client } = useContext(ZkNoidGameContext);
 
   const client_ = client as ClientAppChain<
-    typeof randzuConfig.runtimeModules,
+    typeof pokerShowdownConfig.runtimeModules,
     any,
     any,
     any

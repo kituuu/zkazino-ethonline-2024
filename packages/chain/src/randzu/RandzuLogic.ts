@@ -204,6 +204,13 @@ export class RandzuLogic extends MatchMaker {
   }
 
   // @runtimeMethod()
+  // public async updateWinner(
+  //   winner: PublicKey
+  // ) : Promise<void> {
+  //   await this
+  // }
+
+  // @runtimeMethod()
   // public async getAllCards(gameId: UInt64): Promise<{
   //   player1Cards: Card[],
   //   player2Cards: Card[],
