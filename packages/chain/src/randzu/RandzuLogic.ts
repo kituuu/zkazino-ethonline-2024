@@ -25,6 +25,7 @@ export class PokerCards extends Struct({
   player1Bet: ProtoUInt64,
   player2Bet: ProtoUInt64,
   numberOfTurns: ProtoUInt64,
+  increment: ProtoUInt64,
 }) {
   static from(
     player1Cards: Card[],
@@ -35,7 +36,8 @@ export class PokerCards extends Struct({
     pot: ProtoUInt64,
     player1Bet: ProtoUInt64,
     player2Bet: ProtoUInt64,
-    numberOfTurns: ProtoUInt64
+    numberOfTurns: ProtoUInt64,
+    increment: ProtoUInt64,
   ) {
     return new PokerCards({
       player1Cards,
@@ -47,6 +49,7 @@ export class PokerCards extends Struct({
       player1Bet,
       player2Bet,
       numberOfTurns,
+      increment,
     });
   }
 }
@@ -85,12 +88,13 @@ export class RandzuLogic extends MatchMaker {
           [deck.dealCard(), deck.dealCard()],
           [deck.dealCard(), deck.dealCard()],
           [deck.dealCard(), deck.dealCard(), deck.dealCard(), deck.dealCard(), deck.dealCard()],
-          ProtoUInt64.from(lobby.participationFee),
-          ProtoUInt64.from(lobby.participationFee),
+          lobby.participationFee,
+          lobby.participationFee,
           ProtoUInt64.from(0),
           ProtoUInt64.from(0),
           ProtoUInt64.from(0),
           ProtoUInt64.from(0),
+          ProtoUInt64.from(1)
         ),
       }),
     );
@@ -122,6 +126,7 @@ export class RandzuLogic extends MatchMaker {
     assert(amount.lessThanOrEqual(currentChips), 'Insufficient chips');
 
     gameInfo.field.pot = gameInfo.field.pot.add(amount);
+    gameInfo.field.increment = amount;
     if (gameInfo.currentMoveUser.equals(gameInfo.player1)) {
       gameInfo.field.player1Chips = gameInfo.field.player1Chips.sub(amount);
       gameInfo.field.player1Bet = gameInfo.field.player1Bet.add(amount);
@@ -165,6 +170,7 @@ export class RandzuLogic extends MatchMaker {
     }
 
     gameInfo.field.numberOfTurns = gameInfo.field.numberOfTurns.add(ProtoUInt64.from(1));
+    gameInfo.field.increment = ProtoUInt64.from(0);
     
     gameInfo.currentMoveUser = gameInfo.currentMoveUser.equals(gameInfo.player1)
       ? gameInfo.player2
