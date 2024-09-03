@@ -3,6 +3,7 @@ import { PublicKey, UInt64 } from 'o1js';
 import { RoundIdxUser } from 'zknoid-chain-dev';
 import { MatchMaker, PENDING_BLOCKS_NUM_CONST } from 'zknoid-chain-dev';
 import { type ModuleQuery } from '@proto-kit/sequencer';
+import { UInt64 as ProtoUInt64 } from '@proto-kit/library';
 
 export interface MatchQueueState {
   loading: boolean;

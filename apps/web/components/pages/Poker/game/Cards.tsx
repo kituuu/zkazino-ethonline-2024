@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Card from './Card'; // Assuming Card component is defined elsewhere
 import { Deck } from '@/games/pokerShowdown/utils/deck';
-
+import { UInt64 as ProtoUInt64 } from '@proto-kit/library';
 type Suit = 'DIAMONDS' | 'CLUBS' | 'SPADES' | 'HEARTS' | 'BACK';
 type CardValue = number | 'J' | 'Q' | 'K' | 'A';
 
@@ -12,7 +12,7 @@ interface CardsProps {
   houseDeck: Deck[];
   gameOver: boolean;
   currentUser: 'Player 1' | 'Player 2' | string;
-  player1Chips: number;
+  player1Chips: number ;
   player2Chips: number;
   turn: 'Player 1' | 'Player 2' | string;
   winner: string | null;

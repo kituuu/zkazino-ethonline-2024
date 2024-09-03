@@ -1,7 +1,9 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import { PublicKey, UInt64 } from 'o1js';
+import { GameView } from './components/GameView';
+import { Int64, PublicKey, UInt32, UInt64 } from 'o1js';
+import { UInt64 as ProtoUInt64 } from '@proto-kit/library';
 import { useNetworkStore } from '@/lib/stores/network';
 import {
   useObserveRandzuMatchQueue,
@@ -45,6 +47,9 @@ import {
 import Game from '@/components/pages/Poker/game/Game';
 import { pokerShowdownConfig } from './config';
 import RulesAccordion from './ui/RulesAccordion';
+//import { Poker } from '../poker/Poker';
+import { GameInfo } from 'zknoid-chain-dev/dist/src/randzu/RandzuLogic';
+import { getCards } from './utils/deck';
 
 const competition = {
   id: 'global',
@@ -100,13 +105,31 @@ export default function PokerShowdown({
   const lobbiesStore = useLobbiesStore();
 
   console.log('Active lobby', lobbiesStore.activeLobby);
-  if (matchQueue.gameInfo != undefined) {
-    console.log('THI', matchQueue.gameInfo?.gameId);
-    console.log(
-      'is query working',
-      query?.gameFund.get(UInt64.from(matchQueue.gameInfo?.gameId))
-    );
+
+  
+
+const getPot: any = async (gameId : UInt64) => {
+  const pot : ProtoUInt64 | undefined = await query?.gameFund.get(UInt64.from(gameId));
+  if (pot) {
+    const finalPot = pot.div(ProtoUInt64.from(1000000000));
+    return finalPot;
+    
   }
+}
+const callT = async () => {
+  if(matchQueue.gameInfo != undefined) {
+    console.log("THI", matchQueue.gameInfo?.gameId);
+    console.log('is query working1',await query?.gameFund.get(UInt64.from(matchQueue.gameInfo?.gameId)))
+    console.log("???????", getPot(matchQueue.gameInfo?.gameId));
+  }
+}
+
+
+
+
+
+
+callT();
   const restart = () => {
     matchQueue.resetLastGameState();
     setGameState(GameState.NotStarted);

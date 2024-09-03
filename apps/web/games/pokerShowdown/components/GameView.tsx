@@ -1,11 +1,11 @@
 'use client';
 
 import { IGameInfo } from '@/lib/stores/matchQueue';
-import { RandzuField } from 'zknoid-chain-dev';
+import { PokerCards } from 'zknoid-chain-dev';
 import { useEffect, useRef, useState } from 'react';
 import Game from '@/components/pages/Poker/game/Game';
 interface IGameViewProps {
-  gameInfo: IGameInfo<RandzuField> | undefined;
+  gameInfo: IGameInfo<PokerCards> | undefined;
   onCellClicked: (x: number, y: number) => void;
   loadingElement: { x: number; y: number } | undefined;
   loading: boolean;

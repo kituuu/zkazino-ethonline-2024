@@ -66,6 +66,31 @@ const Game = ({ gameInfo, matchInfo, superIncrement }: IGameViewProps) => {
   const [restart, setRestart] = useState(false);
 
   useEffect(() => {
+    setPlayer1Chips((gameInfo?.field.player1Chips.value.toString() as number)/1000000000)
+    setPlayer2Chips((gameInfo?.field.player2Chips.value.toString() as number)/1000000000);
+    setPot(gameInfo?.field.pot.value.toString());
+    setRaiseAmount(gameInfo?.field.player1Bet.value.toString()); 
+    setPlayer1Name(
+      //matchInfo?.player1Name 
+       gameInfo?.player1?.toString() || 'Player 1'
+    );
+    setPlayer2Name(
+      //matchInfo?.player2Name 
+       gameInfo?.player2?.toString() || 'Player 2'
+    );
+    console.log('deep', player1Chips);
+    console.log('azwesrdctfvyguinmoxdrcftvugybj',gameInfo?.field)
+    setTurn(
+      gameInfo?.currentMoveUser.equals(gameInfo?.player1)
+        ? 'Player 1'
+        : 'Player 2'
+    );
+  }, [gameInfo]);
+
+
+  
+
+  useEffect(() => {
     if (numberOfTurns === 0) {
       setGameOver(true);
       setWinner(
