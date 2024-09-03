@@ -5,7 +5,7 @@ import { Deck, getCards } from '@/games/pokerShowdown/utils/deck';
 import RaiseModal from './RaiseModal';
 import { IGameInfo, MatchQueueState } from '@/lib/stores/matchQueue';
 import { Card, PokerCards } from 'zknoid-chain-dev';
-import { PublicKey } from 'o1js';
+import { PublicKey, UInt64 } from 'o1js';
 import {
   getHand,
   getWinner,
@@ -19,16 +19,19 @@ interface IGameViewProps {
   gameInfo: IGameInfo<PokerCards> | undefined;
   matchInfo: MatchQueueState;
   superIncrement: (from: PublicKey, amount?: number) => Promise<void>;
+  handleCall: () => void;
+  handleRaise: (amount: number) => void;
+  handleFold: () => void;
   // loadingElement: { x: number; y: number } | undefined;
   // loading: boolean;
 }
 
-const Game = ({ gameInfo, matchInfo, superIncrement }: IGameViewProps) => {
+const Game = ({ gameInfo, matchInfo, superIncrement, handleCall, handleRaise, handleFold }: IGameViewProps) => {
   const currentUser = gameInfo?.currentUserIndex == 0 ? 'Player 1' : 'Player 2';
   // Initialize game state
-  const [gameOver, setGameOver] = useState<boolean | undefined>();
+  const [gameOver, setGameOver] = useState<boolean | undefined>(false);
   const [turn, setTurn] = useState('');
-  const [numberOfTurns, setNumberOfTurns] = useState(6);
+  const [numberOfTurns, setNumberOfTurns] = useState(0);
   const player1Deck: Deck[] = getCards(
     gameInfo?.field.player1Cards as Card[]
   ) as Deck[];
@@ -48,42 +51,48 @@ const Game = ({ gameInfo, matchInfo, superIncrement }: IGameViewProps) => {
   const [player1Name, setPlayer1Name] = useState('Player 1');
   const [player2Name, setPlayer2Name] = useState('Player 2');
 
+  const keyToPlayer = {
+    [gameInfo?.player1?.toBase58() as string]: 'Player 1',
+    [gameInfo?.player2?.toBase58() as string]: 'Player 2',
+  }
+
   const [localHand, setLocalHand] = useState('N/A');
 
   const callHandler = async () => {
-    // Handle call/buyin/increment (basically match the previous bet)
-    await superIncrement(gameInfo?.currentMoveUser as PublicKey);
+    await handleCall();
   };
 
   const raiseHandler = async (amount: number) => {
     // TODO: add logic for raise transaction
-    await superIncrement(gameInfo?.currentMoveUser as PublicKey, amount);
+    // await superIncrement(gameInfo?.currentMoveUser as PublicKey, amount);
+    await handleRaise(amount*1000000000);
   };
 
-  const foldHandler = () => {
+  const foldHandler = async () => {
     // Handle fold action -> me surrender
+    await handleFold();
   };
   const [restart, setRestart] = useState(false);
 
   useEffect(() => {
+    setIncrement((gameInfo?.field.increment.value.toString() as number)/1000000000);
     setPlayer1Chips((gameInfo?.field.player1Chips.value.toString() as number)/1000000000)
     setPlayer2Chips((gameInfo?.field.player2Chips.value.toString() as number)/1000000000);
-    setPot(gameInfo?.field.pot.value.toString());
+    setPot((gameInfo?.field.pot.value.toString() as number) / 1000000000);
     setRaiseAmount(gameInfo?.field.player1Bet.value.toString()); 
     setPlayer1Name(
       //matchInfo?.player1Name 
-       gameInfo?.player1?.toString() || 'Player 1'
+      keyToPlayer[gameInfo?.player1?.toBase58() as string] || 'Player 1'
     );
+
     setPlayer2Name(
       //matchInfo?.player2Name 
-       gameInfo?.player2?.toString() || 'Player 2'
+       keyToPlayer[gameInfo?.player2?.toBase58() as string] || 'Player 2'
     );
     console.log('deep', player1Chips);
     console.log('azwesrdctfvyguinmoxdrcftvugybj',gameInfo?.field)
     setTurn(
-      gameInfo?.currentMoveUser.equals(gameInfo?.player1)
-        ? 'Player 1'
-        : 'Player 2'
+      currentUser
     );
   }, [gameInfo]);
 
@@ -91,17 +100,17 @@ const Game = ({ gameInfo, matchInfo, superIncrement }: IGameViewProps) => {
   
 
   useEffect(() => {
-    if (numberOfTurns === 0) {
-      setGameOver(true);
-      setWinner(
-        getWinner(
-          'Player 1',
-          'Player 2',
-          getHand(player1Deck, houseDeck) as Hand,
-          getHand(player2Deck, houseDeck) as Hand
-        )
-      );
-    }
+    // if (numberOfTurns === 0) {
+    //   setGameOver(true);
+    //   setWinner(
+    //     getWinner(
+    //       'Player 1',
+    //       'Player 2',
+    //       getHand(player1Deck, houseDeck) as Hand,
+    //       getHand(player2Deck, houseDeck) as Hand
+    //     )
+    //   );
+    // }
     if (numberOfTurns === 2) {
       setIncrement(0);
       // socket.emit('updateGameState', { increment: 0 });
@@ -134,9 +143,21 @@ const Game = ({ gameInfo, matchInfo, superIncrement }: IGameViewProps) => {
     else if (!gameOver && currentUser === 'Player 2')
       setLocalHand(getHand(player2Deck, houseDeck) as string);
   }, [gameInfo?.field.numberOfTurns]);
-  console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<saarepatte');
+  console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<saarepatte')
   console.log(gameInfo?.field);
-  console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<saarepatte');
+  const a = {
+    currentUser,
+    turn,
+    player1Chips,
+    player2Chips,
+    increment,
+    gameOver
+  }
+  console.log("???>>>>>?", a)
+  console.log("HALLL>>>>>>>", (currentUser !== turn ||
+    (currentUser === 'Player 2' && player2Chips < increment) ||
+    (currentUser === 'Player 1' && player1Chips < increment) ||
+    gameOver))
   return (
     <div className="game-bg noselect">
       <div className="game-board">
@@ -218,3 +239,7 @@ const Game = ({ gameInfo, matchInfo, superIncrement }: IGameViewProps) => {
 };
 
 export default Game;
+
+
+
+
