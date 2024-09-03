@@ -268,7 +268,7 @@ export class MatchMaker extends LobbyManager {
 
     const isTimeout = this.network.block.height
       .sub(game.value.lastMoveBlockHeight)
-      .greaterThan(UInt64.from(MOVE_TIMEOUT_IN_BLOCKS));
+      .greaterThan(UInt64.from(100));
 
     assert(isTimeout, 'Timeout not reached');
 
