@@ -189,6 +189,54 @@ callT();
     await tx.send();
   };
 
+  const handleCall = async () => {
+    const randzuLogic = client.runtime.resolve('RandzuLogic');
+
+    const tx = await client.transaction(
+      PublicKey.fromBase58(networkStore.address!),
+      async () => {
+        randzuLogic.call(
+          UInt64.from(matchQueue.gameInfo?.gameId)
+        );
+      }
+    );
+
+    await tx.sign();
+    await tx.send();
+  };
+  const handleRaise = async (amount: number) => {
+    const randzuLogic = client.runtime.resolve('RandzuLogic');
+
+    const tx = await client.transaction(
+      PublicKey.fromBase58(networkStore.address!),
+      async () => {
+        randzuLogic.raise(
+          UInt64.from(matchQueue.gameInfo?.gameId),
+          ProtoUInt64.from(amount)
+        );
+      }
+    );
+
+    await tx.sign();
+    await tx.send();
+  };
+
+  const handleFold = async () => {
+    const randzuLogic = client.runtime.resolve('RandzuLogic');
+
+    const tx = await client.transaction(
+      PublicKey.fromBase58(networkStore.address!),
+      async () => {
+        randzuLogic.fold(
+          UInt64.from(matchQueue.gameInfo?.gameId)
+        );
+      }
+    );
+
+    await tx.sign();
+    await tx.send();
+  };
+
   useEffect(() => {
     setLoading(false);
     setLoadingElement(undefined);
@@ -294,6 +342,8 @@ callT();
   // console.log('>>>>>>>>>>>>12345', getCards(player1Cards));
   // console.log('>>>>>>>>>>>>123456', getCards(player2Cards));
   // console.log('>>>>>>>>>>>>1234567', getCards(houseCards));
+
+  
 
   return (
     <GamePage gameConfig={pokerShowdownConfig} defaultPage={'Game'}>
@@ -568,6 +618,9 @@ callT();
               gameInfo={matchQueue.gameInfo}
               matchInfo={matchQueue}
               superIncrement={incrementPot}
+              handleCall={handleCall}
+              handleRaise={handleRaise}
+              handleFold={handleFold}
               // onCellClicked={onCellClicked}
 
               // loadingElement={loadingElement}
