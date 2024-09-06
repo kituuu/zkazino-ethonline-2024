@@ -28,9 +28,13 @@ interface IGameViewProps {
 
 const Game = ({ gameInfo, matchInfo, superIncrement, handleCall, handleRaise, handleFold }: IGameViewProps) => {
   const currentUser = gameInfo?.currentUserIndex == 0 ? 'Player 1' : 'Player 2';
+  // const currentUser = gameInfo?.currentMoveUser.equals(gameInfo?.player1) ? 'Player 1' : 'Player 2';
+
+
+
   // Initialize game state
   const [gameOver, setGameOver] = useState<boolean | undefined>(false);
-  const [turn, setTurn] = useState('');
+  const [turn, setTurn] = useState('Player 1');
   const [numberOfTurns, setNumberOfTurns] = useState(0);
   const player1Deck: Deck[] = getCards(
     gameInfo?.field.player1Cards as Card[]
@@ -91,8 +95,14 @@ const Game = ({ gameInfo, matchInfo, superIncrement, handleCall, handleRaise, ha
     );
     console.log('deep', player1Chips);
     console.log('azwesrdctfvyguinmoxdrcftvugybj',gameInfo?.field)
+    console.log("alskdjfalskdfjasldkfjLKJLDKJFLSKDJFLSDKJF>>>>>>>>>>>player1", gameInfo?.player1.toBase58())
+    console.log("alskdjfalskdfjasldkfjLKJLDKJFLSKDJFLSDKJF>>>>>>>>>>>moveuser", gameInfo?.currentMoveUser.toBase58())
+    
+
     setTurn(
-      currentUser
+      gameInfo?.currentMoveUser.equals(gameInfo?.player1).toBoolean()
+        ? 'Player 1'
+        : 'Player 2'
     );
   }, [gameInfo]);
 
@@ -112,20 +122,20 @@ const Game = ({ gameInfo, matchInfo, superIncrement, handleCall, handleRaise, ha
     //   );
     // }
     if (numberOfTurns === 2) {
-      setIncrement(0);
+      setIncrement(gameInfo?.field.increment.value.toString() as number);
       // socket.emit('updateGameState', { increment: 0 });
       // playShufflingSound();
     } else if (numberOfTurns === 4) {
       // socket.emit('updateGameState', {
       setHouseDeck(saarepatte.slice(0, 4));
 
-      setIncrement(0);
+      setIncrement(gameInfo?.field.increment.value.toString() as number);
     } else if (numberOfTurns === 6) {
       console.log(
         'madfhajk sdjkfhjkahsjdhf jkdhsjahsdkjf hjkashdfjk hajksdh jkfahskj'
       );
       setHouseDeck(saarepatte);
-      setIncrement(0);
+      setIncrement(gameInfo?.field.increment.value.toString() as number);
     } else if (numberOfTurns === 8) {
       setGameOver(true);
       setWinner(
@@ -145,13 +155,15 @@ const Game = ({ gameInfo, matchInfo, superIncrement, handleCall, handleRaise, ha
   }, [gameInfo?.field.numberOfTurns]);
   console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<saarepatte')
   console.log(gameInfo?.field);
+  console.log("turn",turn)
+  console.log("bool", gameInfo?.currentMoveUser.equals(gameInfo?.player1).toBoolean)
   const a = {
     currentUser,
     turn,
     player1Chips,
     player2Chips,
     increment,
-    gameOver
+    gameOver,
   }
   console.log("???>>>>>?", a)
   console.log("HALLL>>>>>>>", (currentUser !== turn ||

@@ -341,7 +341,12 @@ callT();
 
   // console.log('>>>>>>>>>>>>12345', getCards(player1Cards));
   // console.log('>>>>>>>>>>>>123456', getCards(player2Cards));
-  // console.log('>>>>>>>>>>>>1234567', getCards(houseCards));
+  console.log('FFFFFFF>>>>>>>>>>>>12345678>', matchQueue.gameInfo?.currentMoveUser.toBase58());
+  console.log('FFFFFFF>>>>>>>>>>>>12345678>', matchQueue.gameInfo?.player1.toBase58());
+  console.log('FFFFFFF>>>>>>>>>>>>123456789>>', matchQueue.gameInfo?.currentUserIndex);
+  console.log('FFFFFFF>>>>>>>>>>>>123456789100', matchQueue.gameInfo?.field.increment.value.toString());
+
+
 
   
 
@@ -385,7 +390,7 @@ callT();
               isReadonly
             />
           )}
-          {mainButtonState == MainButtonState.OpponentsTurn && (
+          {/* {mainButtonState == MainButtonState.OpponentsTurn && (
             <Button
               startContent={
                 <svg
@@ -409,7 +414,7 @@ callT();
           )}
           {mainButtonState == MainButtonState.OpponentTimeOut && (
             <Button label={'OPPONENT TIMED OUT'} isReadonly />
-          )}
+          )} */}
           {mainButtonState == MainButtonState.TransactionExecution && (
             <Button
               startContent={
@@ -533,7 +538,7 @@ callT();
                       />
                     </GameWrap>
                   )}
-                  {gameState === GameState.OpponentTimeout && (
+                  {/* {gameState === GameState.OpponentTimeout && (
                     <GameWrap>
                       <div
                         className={
@@ -594,7 +599,7 @@ callT();
                         />
                       </div>
                     </GameWrap>
-                  )}
+                  )} */}
                 </>
               )}
             </>
