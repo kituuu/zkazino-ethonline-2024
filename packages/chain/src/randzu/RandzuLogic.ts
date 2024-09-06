@@ -120,7 +120,7 @@ export class RandzuLogic extends MatchMaker {
     assert(gameInfo.winner.equals(PublicKey.empty()), 'Game already finished');
 
     assert(amount.greaterThanOrEqual(ProtoUInt64.from(0)), 'Invalid amount');
-    const currentChips = gameInfo.currentMoveUser.equals(gameInfo.player1)
+    const currentChips = gameInfo.currentMoveUser.equals(gameInfo.player1).toBoolean()
       ? gameInfo.field.player1Chips
       : gameInfo.field.player2Chips;
     assert(amount.lessThanOrEqual(currentChips), 'Insufficient chips');
@@ -152,10 +152,10 @@ export class RandzuLogic extends MatchMaker {
     assert(gameInfo.currentMoveUser.equals(this.transaction.sender.value), 'Not your move');
     assert(gameInfo.winner.equals(PublicKey.empty()), 'Game already finished');
 
-    const betDifference: ProtoUInt64 = (gameInfo.currentMoveUser.equals(gameInfo.player1)
+    const betDifference: ProtoUInt64 = (gameInfo.currentMoveUser.equals(gameInfo.player1).toBoolean()
       ? gameInfo.field.player2Bet
       : gameInfo.field.player1Bet).sub(
-        gameInfo.currentMoveUser.equals(gameInfo.player1)
+        gameInfo.currentMoveUser.equals(gameInfo.player1).toBoolean()
           ? gameInfo.field.player1Bet
           : gameInfo.field.player2Bet
       );
@@ -172,7 +172,7 @@ export class RandzuLogic extends MatchMaker {
     gameInfo.field.numberOfTurns = gameInfo.field.numberOfTurns.add(ProtoUInt64.from(1));
     gameInfo.field.increment = ProtoUInt64.from(0);
     
-    gameInfo.currentMoveUser = gameInfo.currentMoveUser.equals(gameInfo.player1)
+    gameInfo.currentMoveUser = gameInfo.currentMoveUser.equals(gameInfo.player1).toBoolean()
       ? gameInfo.player2
       : gameInfo.player1;
 
