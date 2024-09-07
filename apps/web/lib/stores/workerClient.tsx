@@ -149,12 +149,10 @@ export const useWorkerClientStore = create<
       await this.client?.initLotteryInstance(lotteryPublicKey58, networkId);
 
       const onchainState = this.onchainState!;
-      
+
       set((state) => {
         state.onchainStateInitialized = true;
       });
-
-      console.log('Fetched state', this.onchainState);
 
       const roundId = Math.floor(
         (currBlock - Number(onchainState.startBlock)) / BLOCK_PER_ROUND
@@ -214,7 +212,6 @@ export const useWorkerClientStore = create<
       const dt3 = (t4 - t3).toFixed(2);
 
       const msg = `Lottery compiled (${dt1}s, ${dt2}s, ${dt3}s)`;
-      console.log(msg);
 
       set((state) => {
         state.status = msg;

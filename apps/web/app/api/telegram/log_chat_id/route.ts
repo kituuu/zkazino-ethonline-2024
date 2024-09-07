@@ -7,7 +7,6 @@ export async function GET(request: Request) {
     });
 
     bot.on('message', (msg) => {
-      console.log(msg);
       const chatId = msg.chat.id;
 
       // send a message to the chat acknowledging receipt of their message

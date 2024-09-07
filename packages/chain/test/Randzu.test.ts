@@ -32,9 +32,7 @@ export async function mockProof<I, O, P>(
 }
 
 describe('game hub', () => {
-  it.skip('Log proof', async () => {
-    console.log(await dummyBase64Proof());
-  });
+  it.skip('Log proof', async () => {});
   it('Two players basic case', async () => {
     const appChain = TestingAppChain.fromRuntime({
       RandzuLogic,
@@ -60,7 +58,6 @@ describe('game hub', () => {
 
     const randzu = appChain.runtime.resolve('RandzuLogic');
 
-    console.log('Finding match');
     // Find match
     {
       appChain.setSigner(alicePrivateKey);
@@ -88,7 +85,6 @@ describe('game hub', () => {
       let bobGameId =
         await appChain.query.runtime.RandzuLogic.activeGameId.get(bob);
 
-      console.log(aliceGameId?.toString());
       expect(aliceGameId!.equals(bobGameId!)).toBeTruthy();
     }
   }, 100000);

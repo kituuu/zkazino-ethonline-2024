@@ -78,7 +78,9 @@ export class MatchMaker extends LobbyManager {
   public async addDefaultLobby(participationFee: ProtoUInt64): Promise<void> {
     let lobby = Lobby.default(UInt64.zero, Bool(false));
     lobby.participationFee = participationFee;
-    const lastLobbyId = (await this.lastDefaultLobby.get()).orElse(UInt64.from(1));
+    const lastLobbyId = (await this.lastDefaultLobby.get()).orElse(
+      UInt64.from(1),
+    );
     await this.defaultLobbies.set(lastLobbyId, lobby);
     await this.lastDefaultLobby.set(lastLobbyId.add(1));
   }
@@ -101,7 +103,9 @@ export class MatchMaker extends LobbyManager {
     // If player in game – revert
 
     Provable.asProver(async () => {
-      const gameId = (await this.activeGameId.get(sender)).orElse(UInt64.from(0));
+      const gameId = (await this.activeGameId.get(sender)).orElse(
+        UInt64.from(0),
+      );
       if (gameId.equals(UInt64.from(0)).not().toBoolean()) {
         console.log(
           `Register failed. Player already in game ${gameId.toString()}`,
@@ -110,8 +114,7 @@ export class MatchMaker extends LobbyManager {
     });
 
     assert(
-      (await this.activeGameId
-        .get(sender))
+      (await this.activeGameId.get(sender))
         .orElse(UInt64.from(0))
         .equals(UInt64.from(0)),
       'Player already in game',
@@ -149,12 +152,14 @@ export class MatchMaker extends LobbyManager {
     const lobby = lobbyOption.value;
 
     assert(
-      (await this.queueRegisteredRoundUsers.get(
-        new RoundIdxUser({
-          roundId: lobby.id,
-          userAddress: sender,
-        }),
-      )).value,
+      (
+        await this.queueRegisteredRoundUsers.get(
+          new RoundIdxUser({
+            roundId: lobby.id,
+            userAddress: sender,
+          }),
+        )
+      ).value,
       'User is not registered for this matchmaking',
     );
 
@@ -169,15 +174,17 @@ export class MatchMaker extends LobbyManager {
     await this.pendingLobby.set(pendingLobbyIndex, lobby);
   }
 
-  private async joinPendingLobby(lobbyIndex: PendingLobbyIndex): Promise<Lobby> {
+  private async joinPendingLobby(
+    lobbyIndex: PendingLobbyIndex,
+  ): Promise<Lobby> {
     const sender = this.transaction.sender.value;
-    const lobby = (await this.pendingLobby
-      .get(lobbyIndex))
-      .orElse(await this.getDefaultLobby(lobbyIndex.type, lobbyIndex.roundId));
+    const lobby = (await this.pendingLobby.get(lobbyIndex)).orElse(
+      await this.getDefaultLobby(lobbyIndex.type, lobbyIndex.roundId),
+    );
 
     assert(
-      (await this.queueRegisteredRoundUsers
-        .get(
+      (
+        await this.queueRegisteredRoundUsers.get(
           new RoundIdxUser({
             roundId: lobby.id,
             userAddress: sender,
@@ -249,8 +256,13 @@ export class MatchMaker extends LobbyManager {
     );
   }
 
-  protected async proveOpponentTimeout(gameId: UInt64, passTurn: boolean): Promise<void> {
-    const sessionSender = await this.sessions.get(this.transaction.sender.value);
+  protected async proveOpponentTimeout(
+    gameId: UInt64,
+    passTurn: boolean,
+  ): Promise<void> {
+    const sessionSender = await this.sessions.get(
+      this.transaction.sender.value,
+    );
     const sender = Provable.if(
       sessionSender.isSome,
       sessionSender.value,

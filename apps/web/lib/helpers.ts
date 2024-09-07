@@ -24,8 +24,6 @@ export async function sendTransaction(txJson: any) {
       },
     });
 
-    console.log('Sign resp', signResp);
-
     const sendResp = await window.mina.request({
       method: 'mina_sendTransaction',
       params: {
@@ -34,8 +32,6 @@ export async function sendTransaction(txJson: any) {
         transactionType: 'zkapp',
       },
     });
-
-    console.log('Send resp', sendResp);
 
     return sendResp.result.hash;
   } else {

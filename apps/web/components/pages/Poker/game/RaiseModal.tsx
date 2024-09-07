@@ -30,7 +30,7 @@ const RaiseModal: React.FC<RaiseModalProps> = ({
       return false;
     }
     if (value <= minRaise) {
-      setErrors(`Has to be more than ${minRaise}`);
+      setErrors(`Has to be more than ${minRaise / 1000000000}`);
       return false;
     }
     setErrors(null);
@@ -51,7 +51,7 @@ const RaiseModal: React.FC<RaiseModalProps> = ({
     <>
       <button
         onClick={toggleModal}
-        className="w-40 rounded-lg border-2 border-bg-dark bg-bg-dark px-4 py-2 text-foreground hover:bg-bg-grey disabled:opacity-50"
+        className="w-40 rounded-lg border-2 border-bg-dark bg-white px-4 py-2 text-black hover:bg-bg-grey hover:text-white disabled:opacity-50"
         disabled={isDisabled}
       >
         Raise

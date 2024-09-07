@@ -87,8 +87,6 @@ export function createConfig<
       const gameModules = games.getState().map((x) => x.runtimeModules);
       const modules = Object.assign({}, ...gameModules);
 
-      console.log('Loaded modules', modules);
-
       const client = buildClient(modules);
 
       // @todo remove as any

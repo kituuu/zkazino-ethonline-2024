@@ -71,7 +71,6 @@ const state = {
 
 const functions = {
   loadContracts: async (args: {}) => {
-    console.log('[Worker] loading contracts');
     state.gameRecord = GameRecord;
     // state.dummyBridge = DummyBridge;
   },
@@ -80,32 +79,19 @@ const functions = {
   },
   compileContracts: async (args: {}) => {},
   compileReduceProof: async (args: {}) => {
-    console.log('[Worker] compiling reduce proof contracts');
-    console.log('Cache info', LOTTERY_CACHE);
-
     await TicketReduceProgram.compile({
       cache: WebFileSystem(state.lotteryCache!),
     });
-
-    console.log('[Worker] compiling reduce contracts ended');
   },
   compileDistributionProof: async (args: {}) => {
-    console.log('[Worker] compiling distribution contracts');
-    console.log('Cache info', LOTTERY_CACHE);
-
     await DistibutionProgram.compile({
       cache: WebFileSystem(state.lotteryCache!),
     });
-
-    console.log('[Worker] compiling distr contracts ended');
   },
   compileLotteryContracts: async (args: {}) => {
-    console.log('[Worker] compiling lottery contracts');
-
     await PLottery.compile({
       cache: WebFileSystem(state.lotteryCache!),
     });
-    console.log('[Worker] compiling contracts ended');
   },
   initLotteryInstance: async (args: {
     lotteryPublicKey58: string;
@@ -113,15 +99,13 @@ const functions = {
   }) => {
     const publicKey = PublicKey.fromBase58(args.lotteryPublicKey58);
     state.lotteryGame = new PLottery(publicKey);
-    console.log('[Worker] lottery instance init');
+
     const Network = Mina.Network({
       mina: NETWORKS[args.networkId.toString()].graphql,
       archive: NETWORKS[args.networkId.toString()].archive,
     });
-    console.log('Devnet network instance configured.');
-    Mina.setActiveInstance(Network);
 
-    console.log('Fetching account');
+    Mina.setActiveInstance(Network);
 
     await functions.fetchOnchainState();
   },
@@ -129,10 +113,6 @@ const functions = {
     const account = await fetchAccount({
       publicKey: state.lotteryGame!.address,
     });
-    console.log(
-      'Fetched account',
-      account.account?.zkapp?.appState.map((x) => x.toString())
-    );
   },
   buyTicket: async (args: {
     senderAccount: string;
@@ -143,14 +123,11 @@ const functions = {
   }) => {
     const senderAccount = PublicKey.fromBase58(args.senderAccount);
 
-    console.log(args.ticketNums, senderAccount, args.roundId);
     const ticket = Ticket.from(args.ticketNums, senderAccount, args.amount);
 
     let tx = await Mina.transaction(senderAccount, async () => {
       await state.lotteryGame!.buyTicket(ticket, Field014.from(args.roundId));
     });
-
-    console.log('BUY TX', tx);
 
     state.buyTicketTransaction = tx;
   },
@@ -181,19 +158,17 @@ const functions = {
       }
     );
 
-    console.log('Got claim data', claimData);
-
     const { rp } = await claimData.json();
 
-    console.log('Received rp', rp);
-
     const ticket = Ticket.from(args.ticketNums, senderAccount, args.amount);
-    
+
     let tx = await Mina.transaction(senderAccount, async () => {
       await state.lotteryGame!.getReward(
         ticket,
         MerkleMap20Witness.fromJSON(rp.roundWitness) as MerkleMap20Witness,
-        MerkleMap20Witness.fromJSON(rp.roundTicketWitness) as MerkleMap20Witness,
+        MerkleMap20Witness.fromJSON(
+          rp.roundTicketWitness
+        ) as MerkleMap20Witness,
         //@ts-ignore
         await DistributionProof.fromJSON(rp.dp),
         Field.fromJSON(rp.winningNumbers),
@@ -204,16 +179,12 @@ const functions = {
       );
     });
 
-    console.log('GET REWARD TX', tx);
-
     state.getRewardTransaction = tx;
   },
   proveBuyTicketTransaction: async () => {
     const provingStartTime = Date.now() / 1000;
     await state.buyTicketTransaction!.prove();
     const provingEnd = Date.now() / 1000;
-
-    console.log('Buy proving time', (provingEnd - provingStartTime).toFixed(2));
 
     return state.buyTicketTransaction!.toJSON();
   },
@@ -223,11 +194,6 @@ const functions = {
     await state.getRewardTransaction!.prove();
 
     const provingEnd = Date.now() / 1000;
-
-    console.log(
-      'Claim proving time',
-      (provingEnd - provingStartTime).toFixed(2)
-    );
 
     return state.getRewardTransaction!.toJSON();
   },
@@ -261,13 +227,10 @@ const functions = {
     let userInputs = (<any[]>JSON.parse(args.inputs)).map((elem) => {
       return GameInputs.fromJSON(elem);
     });
-    console.log('[Worker] proof checking');
 
-    console.log('Generating map proof');
     let gameContext = await checkMapGeneration(seed);
     const mapGenerationProof = await mockProof(gameContext, MapGenerationProof);
 
-    console.log('Generating gameProcess proof');
     let currentGameState = await initGameProcess(gameContext);
     let currentGameStateProof = await mockProof(
       currentGameState,
@@ -285,20 +248,12 @@ const functions = {
       );
     }
 
-    console.log('Generating game proof');
-
     const gameProof = await mockProof(
       await checkGameRecord(mapGenerationProof, currentGameStateProof),
       GameRecordProof
     );
 
-    console.log('Proof generated', gameProof);
-
     gameProof.verify();
-
-    console.log('Proof verified');
-
-    console.log('Proof generated json', gameProof.toJSON());
 
     return gameProof.toJSON();
   },
@@ -333,8 +288,6 @@ if (typeof window !== 'undefined') {
     }
   );
 }
-
-console.log('Web Worker Successfully Initialized.');
 
 const message: ZknoidWorkerReponse = {
   id: 0,

@@ -21,7 +21,6 @@ export default function NetworkPicker({
   useRegisterWorkerClient();
 
   const switchNetwork = async (network: Network) => {
-    console.log('Switching to', network);
     if (window.mina?.isPallad) {
       await window.mina.request({
         method: 'mina_switchChain',
@@ -76,7 +75,6 @@ export default function NetworkPicker({
 
     (async () => {
       const listener = (accounts: string[]) => {
-        console.log('Accounts changed', accounts);
         const [account] = accounts;
         if (networkStore.minaNetwork?.networkID)
           networkStore.setNetwork(networkStore.minaNetwork);

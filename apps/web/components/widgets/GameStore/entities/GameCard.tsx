@@ -73,7 +73,6 @@ export const GameCard = ({
           (x) => x.status && x.gameId == game.id
         )
       ) {
-        console.log(getFavoritesQuery.data.favorites, game.id);
         setIsFavorite(true);
       }
     }

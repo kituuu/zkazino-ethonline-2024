@@ -64,9 +64,7 @@ async function mockProof<O, P>(
 }
 
 describe('game hub', () => {
-  it.skip('Log proof', async () => {
-    console.log(await dummyBase64Proof());
-  });
+  it.skip('Log proof', async () => {});
   it('Check if cheet codes works', async () => {
     const appChain = TestingAppChain.fromRuntime({
       modules: {
@@ -153,16 +151,15 @@ describe('game hub', () => {
     const lastSeed =
       (await appChain.query.runtime.ArkanoidGameHub.lastSeed.get()) ??
       UInt64.from(0);
-    console.log(lastSeed);
+
     const gameRecordKey: GameRecordKey = new GameRecordKey({
       competitionId: lastSeed,
       player: alice,
     });
-    console.log(gameRecordKey);
+
     const userScore =
       await appChain.query.runtime.ArkanoidGameHub.gameRecords.get(
         gameRecordKey,
       );
-    console.log(userScore?.toBigInt());
   });
 });

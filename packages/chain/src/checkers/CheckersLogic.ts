@@ -73,7 +73,10 @@ export class CheckersLogic extends MatchMaker {
   @state() public games = StateMap.from<UInt64, GameInfo>(UInt64, GameInfo);
   @state() public gamesNum = State.from<UInt64>(UInt64);
 
-  public override async initGame(lobby: Lobby, shouldUpdate: Bool): Promise<UInt64> {
+  public override async initGame(
+    lobby: Lobby,
+    shouldUpdate: Bool,
+  ): Promise<UInt64> {
     const currentGameId = lobby.id;
     const field = Array.from({ length: CHECKERS_FIELD_SIZE }, () =>
       Array(CHECKERS_FIELD_SIZE)
@@ -134,7 +137,9 @@ export class CheckersLogic extends MatchMaker {
     moveType: UInt64,
     proposedIsKing: Bool,
   ): Promise<void> {
-    const sessionSender = await this.sessions.get(this.transaction.sender.value);
+    const sessionSender = await this.sessions.get(
+      this.transaction.sender.value,
+    );
     const sender = Provable.if(
       sessionSender.isSome,
       sessionSender.value,
@@ -396,7 +401,9 @@ export class CheckersLogic extends MatchMaker {
     moveType: UInt64,
     proposedIsKing: Bool,
   ): Promise<void> {
-    const sessionSender = await this.sessions.get(this.transaction.sender.value);
+    const sessionSender = await this.sessions.get(
+      this.transaction.sender.value,
+    );
     const sender = Provable.if(
       sessionSender.isSome,
       sessionSender.value,
@@ -802,7 +809,12 @@ export class CheckersLogic extends MatchMaker {
     );
 
     const winnerShare = ProtoUInt64.from(
-      Provable.if<ProtoUInt64>(winProposed, ProtoUInt64, ProtoUInt64.from(1), ProtoUInt64.from(0)),
+      Provable.if<ProtoUInt64>(
+        winProposed,
+        ProtoUInt64,
+        ProtoUInt64.from(1),
+        ProtoUInt64.from(0),
+      ),
     );
 
     await this.acquireFunds(

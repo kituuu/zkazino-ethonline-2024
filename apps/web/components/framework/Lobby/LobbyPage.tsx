@@ -14,7 +14,10 @@ import ZkNoidGameContext from '@/lib/contexts/ZkNoidGameContext';
 import { ClientAppChain, MatchMaker, ProtoUInt64 } from 'zknoid-chain-dev';
 import { Field, Bool, CircuitString, PublicKey, UInt64 } from 'o1js';
 import { useNetworkStore } from '@/lib/stores/network';
-import { type PendingTransaction, type ModuleQuery } from '@proto-kit/sequencer';
+import {
+  type PendingTransaction,
+  type ModuleQuery,
+} from '@proto-kit/sequencer';
 import { useStore } from 'zustand';
 import { useSessionKeyStore } from '@/lib/stores/sessionKeyStorage';
 import BaseModal from '@/components/shared/Modal/BaseModal';
@@ -114,9 +117,6 @@ export default function LobbyPage<RuntimeModules extends RuntimeModulesRecord>({
 
   useEffect(() => {
     if (lobbiesStore.activeGameId) {
-      console.log(`Active gameId: `, lobbiesStore.activeGameId);
-      console.log(`Move to game page`);
-
       progress.mutate({
         userAddress:
           lobbiesStore.currentLobby!.playersAddresses?.[0]?.toBase58() || '',

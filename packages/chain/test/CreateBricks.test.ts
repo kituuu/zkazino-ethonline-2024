@@ -61,9 +61,7 @@ async function mockProof<O, P>(
 }
 
 describe('game hub', () => {
-  it.skip('Log proof', async () => {
-    console.log(await dummyBase64Proof());
-  });
+  it.skip('Log proof', async () => {});
   it('Check if cheet codes works', async () => {
     const appChain = TestingAppChain.fromRuntime({
       modules: {
@@ -83,6 +81,5 @@ describe('game hub', () => {
     appChain.setSigner(alicePrivateKey);
     const gameHub = appChain.runtime.resolve('GameHub');
     const bricks = createBricksBySeed(Int64.from(5));
-    console.log(bricks);
   });
 });

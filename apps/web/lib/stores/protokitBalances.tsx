@@ -74,15 +74,7 @@ export const useProtokitBalancesStore = create<
 
       const pointSum = Point.add(point1, point2);
 
-      console.log(`pointSum Fields: ${Point.toFields(pointSum)}`);
-
-      console.log(
-        'Bug',
-        TokenId.toFields(key.tokenId),
-        PublicKey.toFields(key.address)
-      );
-      console.log('Bug1', BalancesKey1.toFields(key));
-      // console.log('Bug2', BalancesKey.toFields(key));
+      //
 
       const balance = await client.query.runtime.Balances.balances.get(
         // @ts-ignore
@@ -132,7 +124,7 @@ export const useMinaBridge = () => {
       if (balancesStore.balances[network.address] >= amount) return false;
 
       bridgeStore.setOpen(amount);
-      console.log('Setting open', amount);
+
       return true;
     },
     [network.walletConnected, network.address, balancesStore.balances]
@@ -144,7 +136,7 @@ export const useTestBalanceGetter = () => {
   const balancesStore = useProtokitBalancesStore();
   const network = useNetworkStore();
 
-  const {client: contextAppChainClient} = useContext(ZkNoidGameContext);
+  const { client: contextAppChainClient } = useContext(ZkNoidGameContext);
 
   const client_ = contextAppChainClient as ClientAppChain<
     typeof DefaultRuntimeModules,
@@ -159,12 +151,8 @@ export const useTestBalanceGetter = () => {
     if (!network.address) return;
     if (balancesStore.balances[network.address] >= 100 * 10 ** 9) return;
 
-    const balances = client_.runtime.resolve(
-      'Balances'
-    ) as Balances;
+    const balances = client_.runtime.resolve('Balances') as Balances;
     const sender = PublicKey.fromBase58(network.address!);
-
-    console.log(balances);
 
     const l2tx = await client_.transaction(sender, async () => {
       balances.addBalance(

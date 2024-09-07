@@ -30,12 +30,8 @@ export default function MobileAccount() {
   const disconnectWallet = () => {
     networkStore
       .onWalletConnected(undefined)
-      .then(() => {
-        console.log('Wallet disconnected');
-      })
-      .catch((err) => {
-        console.log('Error while disconnect', err);
-      });
+      .then(() => {})
+      .catch((err) => {});
   };
 
   return (

@@ -461,7 +461,6 @@ export const LobbyInformation = <RuntimeModules extends RuntimeModulesRecord>({
                     )
                   )
                   .catch((error) => {
-                    console.log(error);
                     toast.error(
                       toasterStore,
                       `Error while leave lobby #${lobby.id} '${lobby.name}'`
@@ -486,7 +485,6 @@ export const LobbyInformation = <RuntimeModules extends RuntimeModulesRecord>({
                     )
                   )
                   .catch((error) => {
-                    console.log(error);
                     toast.error(
                       toasterStore,
                       `Error while join lobby #${lobby.id} '${lobby.name}'`

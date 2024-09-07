@@ -14,6 +14,7 @@ export interface MatchQueueState {
   lastGameState: 'win' | 'lost' | undefined;
   pendingBalance: bigint;
   getQueueLength: () => number;
+  setLastGameState: (lastGameState: 'win' | 'lost') => void;
   loadMatchQueue(
     query: ModuleQuery<MatchMaker>,
     blockHeight: number
@@ -49,12 +50,6 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
     set((state) => {
       state.loading = true;
     });
-
-    console.log(
-      'Frontend round',
-      UInt64.from(blockHeight).div(PENDING_BLOCKS_NUM).toBigInt()
-    );
-
     const queueLength = await query.queueLength.get(
       UInt64.from(blockHeight).div(PENDING_BLOCKS_NUM)
     );
@@ -63,6 +58,11 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
       // @ts-ignore
       state.queueLength = Number(queueLength?.toBigInt() || 0);
       state.loading = false;
+    });
+  },
+  setLastGameState(lastGameState: 'win' | 'lost') {
+    set((state) => {
+      state.lastGameState = lastGameState;
     });
   },
   async loadActiveGame(
@@ -75,7 +75,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
     });
 
     const activeGameId = await query.activeGameId.get(address);
-    console.log('Active game idd', activeGameId);
+
     const inQueue = await query.queueRegisteredRoundUsers.get(
       //@ts-ignore
       new RoundIdxUser({
@@ -84,19 +84,13 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
       })
     );
 
-    console.log('Active game idd', activeGameId?.toBigInt());
-    console.log('In queue', inQueue?.toBoolean());
-
     if (
       activeGameId?.equals(UInt64.from(0)).toBoolean() &&
       this.gameInfo?.gameId
     ) {
-      console.log('Setting last game state', this.gameInfo?.gameId);
       const gameInfo = (await query.games.get(
         UInt64.from(this.gameInfo?.gameId!)
       ))!;
-      console.log('Fetched last game info', gameInfo);
-      console.log('Game winner', gameInfo.winner.toBase58());
 
       // const field = (gameInfo.field as RandzuField).value.map((x: UInt32[]) =>
       //   x.map((x) => x.toBigint())
@@ -113,7 +107,6 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
 
     if (activeGameId?.greaterThan(UInt64.from(0)).toBoolean()) {
       const gameInfo = (await query.games.get(activeGameId))!;
-      console.log('Raw game info', gameInfo);
 
       const currentUserIndex = address
         .equals(gameInfo.player1 as PublicKey)
@@ -126,7 +119,7 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
       //   x.map((x) => x.toBigint())
       // );
       const lastMoveBlockHeight = gameInfo.lastMoveBlockHeight;
-      console.log('BH', lastMoveBlockHeight);
+
       set((state) => {
         // @ts-ignore
         state.gameInfo = {
@@ -145,15 +138,12 @@ export const matchQueueInitializer = immer<MatchQueueState>((set) => ({
             ? gameInfo.winner
             : undefined,
         };
-        console.log('Parsed game info', state.gameInfo);
       });
     }
 
     const pendingBalance = (
       await query.pendingBalances.get(address)
     )?.toBigInt();
-
-    console.log('Pending balance', pendingBalance);
 
     set((state) => {
       // @ts-ignore

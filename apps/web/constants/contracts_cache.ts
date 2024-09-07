@@ -69,5 +69,3 @@ export const LOTTERY_CACHE: ContractCache = {
   files: LOTTERY_CACHE_LIST,
   urls: LOTTERY_CACHE_LIST.map((x) => `/lottery_cache/${x}`),
 };
-
-console.log('Lottery cache', LOTTERY_CACHE);

@@ -60,24 +60,20 @@ export default function DepositMenuItem() {
   useEffect(() => {
     const newBalance = protokitBalancesStore.balances[networkStore.address!];
     if (bridgeStore.amount > 0 && newBalance >= bridgeStore.amount) {
-      console.log('[Balance update finished!]');
       bridgeStore.close();
     }
-    console.log('Balance update');
   }, [protokitBalancesStore.balances[networkStore.address!]]);
 
   const logBridged = api.logging.logBridged.useMutation();
 
   const bridge = async (amount: bigint) => {
-    console.log('Bridging', amount);
     try {
       const l1tx = await Mina.transaction(async () => {
         const senderUpdate = AccountUpdate.create(
           PublicKey.fromBase58(networkStore.address!)
         );
         senderUpdate.requireSignature();
-        console.log(BRIDGE_ADDR);
-        console.log(amountIn);
+
         senderUpdate.send({
           to: PublicKey.fromBase58(BRIDGE_ADDR),
           amount: Number(amount),
@@ -138,8 +134,6 @@ export default function DepositMenuItem() {
   };
 
   const unbridge = async (amount: bigint) => {
-    console.log('Burning', amount);
-
     try {
       const balances = (contextAppChainClient!.runtime as any).resolve(
         'Balances'
@@ -336,7 +330,6 @@ export default function DepositMenuItem() {
                     toast.success(toasterStore, 'Unbridge success', true)
                   )
                   .catch((error) => {
-                    console.log(error);
                     toast.error(toasterStore, 'Unbridge error', true);
                   })
               : bridge(amountIn)
@@ -344,7 +337,6 @@ export default function DepositMenuItem() {
                     toast.success(toasterStore, 'Bridge success', true)
                   )
                   .catch((error) => {
-                    console.log(error);
                     toast.error(toasterStore, 'Bridge error', true);
                   })
           }

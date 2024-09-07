@@ -68,7 +68,7 @@ export default class ZknoidWorkerClient {
       amount,
     });
   }
-  
+
   getLotteryState() {
     return this._call('getLotteryState', {});
   }
@@ -84,17 +84,17 @@ export default class ZknoidWorkerClient {
     inputs: GameInputs[];
     debug: Bool;
   }) {
-    const result = await this._call('proveGameRecord', {
+    const result = (await this._call('proveGameRecord', {
       seedJson: seed.toJSON(),
       inputs: JSON.stringify(inputs.map((elem) => GameInputs.toJSON(elem))),
       debug: Bool.toJSON(debug),
-    }) as any;
-    console.log('Restoring', result);
+    })) as any;
+
     const restoredProof = new GameRecordProof({
       proof: result.proof,
       publicInput: result.publicInput,
       publicOutput: result.publicOutput,
-      maxProofsVerified: result.maxProofsVerified
+      maxProofsVerified: result.maxProofsVerified,
     });
 
     return restoredProof;

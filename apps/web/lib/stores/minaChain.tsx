@@ -106,8 +106,6 @@ export const usePollMinaBlockHeight = () => {
   const network = useNetworkStore();
 
   useEffect(() => {
-    console.log('Poll chain id', network.minaNetwork?.networkID);
-
     if (!network.minaNetwork?.networkID) return;
 
     const intervalId = setInterval(

@@ -47,7 +47,6 @@ const OpponentItem = ({
           try {
             await register(option.id);
           } catch (e) {
-            console.log('Registration error', e);
             return;
           }
           matchmakingMutation.mutate({

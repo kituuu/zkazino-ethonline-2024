@@ -83,8 +83,6 @@ export const lobbyInitializer = immer<LobbiesState>((set) => ({
       });
     }
 
-    console.log('New matchmaking options', matchmakingOptions);
-
     set((state) => {
       state.matchmakingOptions = matchmakingOptions;
     });
@@ -103,7 +101,6 @@ export const lobbyInitializer = immer<LobbiesState>((set) => ({
     let activeLobby: ILobby | undefined = undefined;
 
     if (!lastLobbyId) {
-      console.log(`Can't get lobby info`);
       return;
     }
 
@@ -113,14 +110,12 @@ export const lobbyInitializer = immer<LobbiesState>((set) => ({
       ? +contractActiveGameId
       : contractActiveGameId;
 
-    console.log('contractActiveGameId', contractActiveGameId);
-
     if (contractActiveGameId) {
       const contractActiveLobby =
         await query.activeLobby.get(contractActiveGameId);
       if (contractActiveLobby) {
         const curLobby = contractActiveLobby!;
-        console.log('CurrLobby', curLobby);
+
         const players = +curLobby.curAmount;
 
         activeLobby = {
@@ -198,8 +193,6 @@ export const lobbyInitializer = immer<LobbiesState>((set) => ({
       }
     }
 
-    console.log('Active lobby', activeLobby);
-
     set((state) => {
       // @ts-ignore
       state.lobbies = lobbies;
@@ -212,7 +205,6 @@ export const lobbyInitializer = immer<LobbiesState>((set) => ({
   },
 
   async loadmatchmakingOptions(query: ModuleQuery<MatchMaker>) {
-    console.log('Options loading');
     let lastDefaultLobbyId = await query.lastDefaultLobby.get();
     let matchmakingOptions: IMatchamkingOption[] = [];
 
@@ -262,10 +254,8 @@ export const useObserveLobbiesStore = (
         PublicKey.fromBase58(network.address),
         rewardCoeff
       );
-      console.log('bcl', chain.block?.height);
-      if (chain.block?.height) {
-        console.log('Loading..');
 
+      if (chain.block?.height) {
         lobbiesStore.loadPendingmatchmakingStatus(
           query!,
           PublicKey.fromBase58(network.address),

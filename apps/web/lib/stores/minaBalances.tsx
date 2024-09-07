@@ -47,8 +47,6 @@ export const useMinaBalancesStore = create<
 
       const balance = BigInt(account.account?.balance.toBigInt() ?? 0n);
 
-      console.log('Balance fetching', balance);
-
       set((state) => {
         state.loading = false;
         state.balances[address] = balance ?? 0n;
