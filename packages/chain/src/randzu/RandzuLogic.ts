@@ -124,14 +124,14 @@ export class RandzuLogic extends MatchMaker {
     assert(gameInfo.winner.equals(PublicKey.empty()), `Game finished`);
 
     assert(amount.greaterThanOrEqual(ProtoUInt64.from(0)), 'Invalid amount');
-    const currentChips = gameInfo.currentMoveUser.equals(gameInfo.player1)
+    const currentChips = sender.equals(gameInfo.player1)
       ? gameInfo.field.player1Chips
       : gameInfo.field.player2Chips;
     assert(amount.lessThanOrEqual(currentChips), 'Insufficient chips');
 
     gameInfo.field.pot = gameInfo.field.pot.add(amount);
     gameInfo.field.increment = amount;
-    if (gameInfo.currentMoveUser.equals(gameInfo.player1)) {
+    if (sender.equals(gameInfo.player1)) {
       gameInfo.field.player1Chips = gameInfo.field.player1Chips.sub(amount);
       gameInfo.field.player1Bet = gameInfo.field.player1Bet.add(amount);
     } else {
@@ -154,19 +154,36 @@ export class RandzuLogic extends MatchMaker {
     const game = await this.games.get(gameId);
     assert(game.isSome, 'Invalid game id');
     const gameInfo = game.value;
-
-    assert(
-      gameInfo.currentMoveUser.equals(this.transaction.sender.value),
-      'Not your move',
+    const sessionSender = await this.sessions.get(
+      this.transaction.sender.value,
     );
-    assert(gameInfo.winner.equals(PublicKey.empty()), 'Game already finished');
+    const sender = Provable.if(
+      sessionSender.isSome,
+      sessionSender.value,
+      this.transaction.sender.value,
+    );
+    assert(game.isSome, 'Invalid game id');
+    assert(gameInfo.currentMoveUser.equals(sender), `Not your move`);
+    assert(gameInfo.winner.equals(PublicKey.empty()), `Game finished`);
 
+    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');
+    // console.log('player1');
+    // console.log(gameInfo.player1);
+    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');
+    // console.log('player2');
+    // console.log(gameInfo.player2);
+    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');
+    // console.log('sender');
+    // console.log(sender);
+    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');
+    // console.log('currentMoveUser');
+    // console.log(gameInfo.currentMoveUser);
     const betDifference: ProtoUInt64 = (
-      gameInfo.currentMoveUser.equals(gameInfo.player1)
-        ? gameInfo.field.player2Bet
-        : gameInfo.field.player1Bet
+      gameInfo.currentMoveUser.equals(gameInfo.player2)
+        ? gameInfo.field.player2Chips
+        : gameInfo.field.player1Chips
     ).sub(
-      gameInfo.currentMoveUser.equals(gameInfo.player1)
+      gameInfo.currentMoveUser.equals(gameInfo.player2)
         ? gameInfo.field.player1Bet
         : gameInfo.field.player2Bet,
     );
@@ -177,14 +194,14 @@ export class RandzuLogic extends MatchMaker {
       'Invalid call amount',
     );
 
-    gameInfo.field.pot = gameInfo.field.pot.add(betDifference);
-    if (gameInfo.currentMoveUser.equals(gameInfo.player1)) {
-      gameInfo.field.player1Chips =
-        gameInfo.field.player1Chips.sub(betDifference);
-    } else {
-      gameInfo.field.player2Chips =
-        gameInfo.field.player2Chips.sub(betDifference);
-    }
+    const delta = gameInfo.currentMoveUser.equals(gameInfo.player2)
+      ? gameInfo.field.player1Bet
+      : gameInfo.field.player2Bet;
+
+    gameInfo.field.pot = gameInfo.field.pot.add(delta);
+    if (gameInfo.currentMoveUser.equals(gameInfo.player2))
+      gameInfo.field.player2Chips = gameInfo.field.player2Chips.sub(delta);
+    else gameInfo.field.player1Chips = gameInfo.field.player1Chips.sub(delta);
 
     gameInfo.field.numberOfTurns = gameInfo.field.numberOfTurns.add(
       ProtoUInt64.from(1),
