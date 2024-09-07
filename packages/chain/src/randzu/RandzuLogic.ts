@@ -148,7 +148,7 @@ export class RandzuLogic extends MatchMaker {
       gameInfo.currentMoveUser.equals(gameInfo.player1),
       ProtoUInt64,
       gameInfo.field.player1Chips.sub(amount),
-      gameInfo.field.player2Chips,
+      gameInfo.field.player1Chips,
     ) as ProtoUInt64;
 
     const newPlayer2Chips = Provable.if(
@@ -165,15 +165,15 @@ export class RandzuLogic extends MatchMaker {
       gameInfo.currentMoveUser.equals(gameInfo.player1),
       ProtoUInt64,
       gameInfo.field.player1Bet.add(amount),
-      gameInfo.field.player2Chips,
+      gameInfo.field.player1Bet,
     ) as ProtoUInt64;
     gameInfo.field.player1Bet = newPlayer1Bet;
 
     const newPlayer2Bet = Provable.if(
       gameInfo.currentMoveUser.equals(gameInfo.player2),
       ProtoUInt64,
-      { value: gameInfo.field.player2Bet.value.add(amount.value) },
-      gameInfo.field.player2Chips,
+      gameInfo.field.player2Bet.add(amount),
+      gameInfo.field.player2Bet,
     ) as ProtoUInt64;
     gameInfo.field.player2Bet = newPlayer2Bet;
 
@@ -203,7 +203,7 @@ export class RandzuLogic extends MatchMaker {
     assert(game.isSome, 'Invalid game id');
     assert(gameInfo.currentMoveUser.equals(sender), `Not your move`);
     assert(gameInfo.winner.equals(PublicKey.empty()), `Game finished`);
-
+    
     const delta = Provable.if(
       gameInfo.currentMoveUser.equals(gameInfo.player2),
       ProtoUInt64,

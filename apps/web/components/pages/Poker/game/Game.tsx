@@ -106,6 +106,15 @@ const Game = ({
     setWinnerPk(winner == 'Player 1' ? gameInfo?.player1 : gameInfo?.player2);
     setGameOver(true);
   };
+
+  const checkEnough = async (increment : number) => {
+    const pid = ((gameInfo?.currentMoveUser.equals(gameInfo?.player1)) ? gameInfo?.field.player1Chips : gameInfo?.field.player2Chips)
+    return (pid?.value.toString() as number) > increment;
+  }
+  
+
+
+
   const [restart, setRestart] = useState(false);
   useEffect(() => {
     setIncrement(
@@ -184,6 +193,7 @@ const Game = ({
         }
       }
     }
+    
 
     if (!gameOver && currentUser === 'Player 1')
       setLocalHand(getHand(player1Deck, houseDeck) as string);
@@ -240,7 +250,7 @@ const Game = ({
                   numberOfTurns < 2 &&
                   `Buy In(${increment / 1000000000})`) ||
                   (raiseAmount === 0 &&
-                    increment &&
+                    increment && ((((gameInfo?.currentMoveUser.equals(gameInfo?.player1)) ? gameInfo?.field.player1Chips : gameInfo?.field.player2Chips)?.value.toString() as number) > increment) &&
                     `Call(${increment / 1000000000})`) ||
                   (raiseAmount > 0 && `Call(${raiseAmount / 1000000000})`) ||
                   'Check'}
