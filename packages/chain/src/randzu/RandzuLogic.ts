@@ -1,14 +1,7 @@
 import { state, runtimeMethod, runtimeModule } from '@proto-kit/module';
 import type { Option } from '@proto-kit/protocol';
 import { State, StateMap, assert } from '@proto-kit/protocol';
-import {
-  PublicKey,
-  Struct,
-  UInt64,
-  Provable,
-  Bool,
-  Poseidon,
-} from 'o1js';
+import { PublicKey, Struct, UInt64, Provable, Bool, Poseidon } from 'o1js';
 import { MatchMaker } from '../engine/MatchMaker';
 import { UInt64 as ProtoUInt64 } from '@proto-kit/library';
 import { Lobby } from '../engine/LobbyManager';
@@ -87,14 +80,20 @@ export class RandzuLogic extends MatchMaker {
         field: PokerCards.from(
           [deck.dealCard(), deck.dealCard()],
           [deck.dealCard(), deck.dealCard()],
-          [deck.dealCard(), deck.dealCard(), deck.dealCard(), deck.dealCard(), deck.dealCard()],
+          [
+            deck.dealCard(),
+            deck.dealCard(),
+            deck.dealCard(),
+            deck.dealCard(),
+            deck.dealCard(),
+          ],
           lobby.participationFee,
           lobby.participationFee,
           ProtoUInt64.from(0),
           ProtoUInt64.from(0),
           ProtoUInt64.from(0),
           ProtoUInt64.from(0),
-          ProtoUInt64.from(1)
+          ProtoUInt64.from(1),
         ),
       }),
     );
@@ -108,19 +107,24 @@ export class RandzuLogic extends MatchMaker {
   }
 
   @runtimeMethod()
-  public async raise(
-    gameId: UInt64,
-    amount: ProtoUInt64
-  ): Promise<void> {
+  public async raise(gameId: UInt64, amount: ProtoUInt64): Promise<void> {
     const game = await this.games.get(gameId);
     assert(game.isSome, 'Invalid game id');
     const gameInfo = game.value;
-
-    assert(gameInfo.currentMoveUser.equals(this.transaction.sender.value), 'Not your move');
-    assert(gameInfo.winner.equals(PublicKey.empty()), 'Game already finished');
+    const sessionSender = await this.sessions.get(
+      this.transaction.sender.value,
+    );
+    const sender = Provable.if(
+      sessionSender.isSome,
+      sessionSender.value,
+      this.transaction.sender.value,
+    );
+    assert(game.isSome, 'Invalid game id');
+    assert(gameInfo.currentMoveUser.equals(sender), `Not your move`);
+    assert(gameInfo.winner.equals(PublicKey.empty()), `Game finished`);
 
     assert(amount.greaterThanOrEqual(ProtoUInt64.from(0)), 'Invalid amount');
-    const currentChips = gameInfo.currentMoveUser.equals(gameInfo.player1).toBoolean()
+    const currentChips = gameInfo.currentMoveUser.equals(gameInfo.player1)
       ? gameInfo.field.player1Chips
       : gameInfo.field.player2Chips;
     assert(amount.lessThanOrEqual(currentChips), 'Insufficient chips');
@@ -135,9 +139,11 @@ export class RandzuLogic extends MatchMaker {
       gameInfo.field.player2Bet = gameInfo.field.player2Bet.add(amount);
     }
 
-    gameInfo.currentMoveUser = gameInfo.currentMoveUser.equals(gameInfo.player1)
-      ? gameInfo.player2
-      : gameInfo.player1;
+    gameInfo.currentMoveUser = Provable.if(
+      gameInfo.currentMoveUser.equals(game.value.player1),
+      gameInfo.player2,
+      gameInfo.player1,
+    );
 
     gameInfo.lastMoveBlockHeight = this.network.block.height;
     await this.games.set(gameId, gameInfo);
@@ -149,32 +155,47 @@ export class RandzuLogic extends MatchMaker {
     assert(game.isSome, 'Invalid game id');
     const gameInfo = game.value;
 
-    assert(gameInfo.currentMoveUser.equals(this.transaction.sender.value), 'Not your move');
+    assert(
+      gameInfo.currentMoveUser.equals(this.transaction.sender.value),
+      'Not your move',
+    );
     assert(gameInfo.winner.equals(PublicKey.empty()), 'Game already finished');
 
-    const betDifference: ProtoUInt64 = (gameInfo.currentMoveUser.equals(gameInfo.player1).toBoolean()
-      ? gameInfo.field.player2Bet
-      : gameInfo.field.player1Bet).sub(
-        gameInfo.currentMoveUser.equals(gameInfo.player1).toBoolean()
-          ? gameInfo.field.player1Bet
-          : gameInfo.field.player2Bet
-      );
+    const betDifference: ProtoUInt64 = (
+      gameInfo.currentMoveUser.equals(gameInfo.player1)
+        ? gameInfo.field.player2Bet
+        : gameInfo.field.player1Bet
+    ).sub(
+      gameInfo.currentMoveUser.equals(gameInfo.player1)
+        ? gameInfo.field.player1Bet
+        : gameInfo.field.player2Bet,
+    );
+    console.log(betDifference);
 
-    assert(betDifference.greaterThanOrEqual(ProtoUInt64.from(0)), 'Invalid call amount');
+    assert(
+      betDifference.greaterThanOrEqual(ProtoUInt64.from(0)),
+      'Invalid call amount',
+    );
 
     gameInfo.field.pot = gameInfo.field.pot.add(betDifference);
     if (gameInfo.currentMoveUser.equals(gameInfo.player1)) {
-      gameInfo.field.player1Chips = gameInfo.field.player1Chips.sub(betDifference);
+      gameInfo.field.player1Chips =
+        gameInfo.field.player1Chips.sub(betDifference);
     } else {
-      gameInfo.field.player2Chips = gameInfo.field.player2Chips.sub(betDifference);
+      gameInfo.field.player2Chips =
+        gameInfo.field.player2Chips.sub(betDifference);
     }
 
-    gameInfo.field.numberOfTurns = gameInfo.field.numberOfTurns.add(ProtoUInt64.from(1));
+    gameInfo.field.numberOfTurns = gameInfo.field.numberOfTurns.add(
+      ProtoUInt64.from(1),
+    );
     gameInfo.field.increment = ProtoUInt64.from(0);
-    
-    gameInfo.currentMoveUser = gameInfo.currentMoveUser.equals(gameInfo.player1).toBoolean()
-      ? gameInfo.player2
-      : gameInfo.player1;
+
+    gameInfo.currentMoveUser = Provable.if(
+      gameInfo.currentMoveUser.equals(gameInfo.player1),
+      gameInfo.player2,
+      gameInfo.player1,
+    );
 
     gameInfo.lastMoveBlockHeight = this.network.block.height;
     await this.games.set(gameId, gameInfo);
@@ -186,8 +207,14 @@ export class RandzuLogic extends MatchMaker {
     assert(game.isSome, 'Invalid game id');
     const gameInfo = game.value;
 
-    assert(gameInfo.winner.equals(PublicKey.empty()), 'Winner already declared');
-    assert(winner.equals(gameInfo.player1) || winner.equals(gameInfo.player2), 'Invalid winner');
+    assert(
+      gameInfo.winner.equals(PublicKey.empty()),
+      'Winner already declared',
+    );
+    assert(
+      winner.equals(gameInfo.player1) || winner.equals(gameInfo.player2),
+      'Invalid winner',
+    );
 
     gameInfo.winner = winner;
     await this.games.set(gameId, gameInfo);
@@ -196,7 +223,10 @@ export class RandzuLogic extends MatchMaker {
     await this.mintAndTransferPot(winner, totalPot);
   }
 
-  private async mintAndTransferPot(winner: PublicKey, amount: ProtoUInt64): Promise<void> {
+  private async mintAndTransferPot(
+    winner: PublicKey,
+    amount: ProtoUInt64,
+  ): Promise<void> {
     await this.balances.mint(ZNAKE_TOKEN_ID, winner, amount);
   }
 
@@ -206,7 +236,10 @@ export class RandzuLogic extends MatchMaker {
     assert(game.isSome, 'Invalid game id');
     const gameInfo = game.value;
 
-    assert(gameInfo.currentMoveUser.equals(this.transaction.sender.value), 'Not your move');
+    assert(
+      gameInfo.currentMoveUser.equals(this.transaction.sender.value),
+      'Not your move',
+    );
     assert(gameInfo.winner.equals(PublicKey.empty()), 'Game already finished');
 
     const winner = gameInfo.currentMoveUser.equals(gameInfo.player1)
