@@ -1,7 +1,15 @@
 import { state, runtimeMethod, runtimeModule } from '@proto-kit/module';
 import type { Option } from '@proto-kit/protocol';
 import { State, StateMap, assert } from '@proto-kit/protocol';
-import { PublicKey, Struct, UInt64, Provable, Bool, Poseidon } from 'o1js';
+import {
+  PublicKey,
+  Struct,
+  UInt64,
+  Provable,
+  Bool,
+  Poseidon,
+  Field,
+} from 'o1js';
 import { MatchMaker } from '../engine/MatchMaker';
 import { UInt64 as ProtoUInt64 } from '@proto-kit/library';
 import { Lobby } from '../engine/LobbyManager';
@@ -124,20 +132,50 @@ export class RandzuLogic extends MatchMaker {
     assert(gameInfo.winner.equals(PublicKey.empty()), `Game finished`);
 
     assert(amount.greaterThanOrEqual(ProtoUInt64.from(0)), 'Invalid amount');
-    const currentChips = sender.equals(gameInfo.player1)
-      ? gameInfo.field.player1Chips
-      : gameInfo.field.player2Chips;
+    const currentChips = Provable.if(
+      sender.equals(gameInfo.player1),
+      ProtoUInt64,
+      gameInfo.field.player1Chips,
+      gameInfo.field.player2Chips,
+    ) as ProtoUInt64;
+
     assert(amount.lessThanOrEqual(currentChips), 'Insufficient chips');
 
     gameInfo.field.pot = gameInfo.field.pot.add(amount);
     gameInfo.field.increment = amount;
-    if (sender.equals(gameInfo.player1)) {
-      gameInfo.field.player1Chips = gameInfo.field.player1Chips.sub(amount);
-      gameInfo.field.player1Bet = gameInfo.field.player1Bet.add(amount);
-    } else {
-      gameInfo.field.player2Chips = gameInfo.field.player2Chips.sub(amount);
-      gameInfo.field.player2Bet = gameInfo.field.player2Bet.add(amount);
-    }
+
+    const newPlayer1Chips = Provable.if(
+      gameInfo.currentMoveUser.equals(gameInfo.player1),
+      ProtoUInt64,
+      gameInfo.field.player1Chips.sub(amount),
+      gameInfo.field.player2Chips,
+    ) as ProtoUInt64;
+
+    const newPlayer2Chips = Provable.if(
+      gameInfo.currentMoveUser.equals(gameInfo.player2),
+      ProtoUInt64,
+      gameInfo.field.player2Chips.sub(amount),
+      gameInfo.field.player2Chips,
+    ) as ProtoUInt64;
+    gameInfo.field.player1Chips = newPlayer1Chips;
+
+    gameInfo.field.player2Chips = newPlayer2Chips;
+
+    const newPlayer1Bet = Provable.if(
+      gameInfo.currentMoveUser.equals(gameInfo.player1),
+      ProtoUInt64,
+      gameInfo.field.player1Bet.add(amount),
+      gameInfo.field.player2Chips,
+    ) as ProtoUInt64;
+    gameInfo.field.player1Bet = newPlayer1Bet;
+
+    const newPlayer2Bet = Provable.if(
+      gameInfo.currentMoveUser.equals(gameInfo.player2),
+      ProtoUInt64,
+      { value: gameInfo.field.player2Bet.value.add(amount.value) },
+      gameInfo.field.player2Chips,
+    ) as ProtoUInt64;
+    gameInfo.field.player2Bet = newPlayer2Bet;
 
     gameInfo.currentMoveUser = Provable.if(
       gameInfo.currentMoveUser.equals(game.value.player1),
@@ -166,42 +204,37 @@ export class RandzuLogic extends MatchMaker {
     assert(gameInfo.currentMoveUser.equals(sender), `Not your move`);
     assert(gameInfo.winner.equals(PublicKey.empty()), `Game finished`);
 
-    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');
-    // console.log('player1');
-    // console.log(gameInfo.player1);
-    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');
-    // console.log('player2');
-    // console.log(gameInfo.player2);
-    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');
-    // console.log('sender');
-    // console.log(sender);
-    // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');
-    // console.log('currentMoveUser');
-    // console.log(gameInfo.currentMoveUser);
-    const betDifference: ProtoUInt64 = (
-      gameInfo.currentMoveUser.equals(gameInfo.player2)
-        ? gameInfo.field.player2Chips
-        : gameInfo.field.player1Chips
-    ).sub(
-      gameInfo.currentMoveUser.equals(gameInfo.player2)
-        ? gameInfo.field.player1Bet
-        : gameInfo.field.player2Bet,
-    );
-    console.log(betDifference);
-
-    assert(
-      betDifference.greaterThanOrEqual(ProtoUInt64.from(0)),
-      'Invalid call amount',
-    );
-
-    const delta = gameInfo.currentMoveUser.equals(gameInfo.player2)
-      ? gameInfo.field.player1Bet
-      : gameInfo.field.player2Bet;
+    const delta = Provable.if(
+      gameInfo.currentMoveUser.equals(gameInfo.player2),
+      ProtoUInt64,
+      gameInfo.field.player1Bet,
+      gameInfo.field.player2Bet,
+    ) as ProtoUInt64;
 
     gameInfo.field.pot = gameInfo.field.pot.add(delta);
-    if (gameInfo.currentMoveUser.equals(gameInfo.player2))
-      gameInfo.field.player2Chips = gameInfo.field.player2Chips.sub(delta);
-    else gameInfo.field.player1Chips = gameInfo.field.player1Chips.sub(delta);
+
+    const newPlayer2Chips = Provable.if(
+      gameInfo.currentMoveUser.equals(gameInfo.player2),
+      ProtoUInt64,
+      gameInfo.field.player2Chips.sub(delta),
+      gameInfo.field.player2Chips,
+    ) as ProtoUInt64;
+    const newPlayer1Chips = Provable.if(
+      gameInfo.currentMoveUser.equals(gameInfo.player1),
+      ProtoUInt64,
+      gameInfo.field.player1Chips.sub(delta),
+      gameInfo.field.player1Chips,
+    ) as ProtoUInt64;
+    gameInfo.field.player2Chips = newPlayer2Chips;
+    gameInfo.field.player1Chips = newPlayer1Chips;
+    // console.log('hakuna');
+    // console.log(typeof gameInfo.field.player2Chips);
+    // console.log(gameInfo.field.player2Chips);
+    // console.log(gameInfo.field.player2Chips.value);
+    // console.log('hakuna');
+    // console.log(typeof newPlayer2Chips);
+    // console.log(newPlayer2Chips);
+    // console.log(newPlayer2Chips.value);
 
     gameInfo.field.numberOfTurns = gameInfo.field.numberOfTurns.add(
       ProtoUInt64.from(1),
