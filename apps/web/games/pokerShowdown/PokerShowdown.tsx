@@ -127,20 +127,6 @@ export default function PokerShowdown({
 
   // nonSSR
 
-  const incrementPot = async (from: PublicKey, amount?: number) => {
-    // TODO -> do magix
-    if (!amount) {
-      // do something
-      return;
-    }
-    let inc = amount;
-    if (matchQueue.gameInfo.field.numberOfTurns % 2 !== 0) {
-      // Do something
-      inc = amount - matchQueue.gameInfo.field.increment;
-    }
-    // direct handler function here
-  };
-
   const collectPending = async () => {
     const randzuLogic = client.runtime.resolve('RandzuLogic');
 

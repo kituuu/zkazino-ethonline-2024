@@ -60,8 +60,12 @@ const Game = ({
   ) as Deck[];
   const [houseDeck, setHouseDeck] = useState<Deck[]>(saarepatte.slice(0, 3));
   const [winner, setWinner] = useState<string>('');
-  const [player1Chips, setPlayer1Chips] = useState(0);
-  const [player2Chips, setPlayer2Chips] = useState(0);
+  const [player1Chips, setPlayer1Chips] = useState(
+    (gameInfo?.field.player1Chips.value.toString() as number) / 1000000000
+  );
+  const [player2Chips, setPlayer2Chips] = useState(
+    (gameInfo?.field.player2Chips.value.toString() as number) / 1000000000
+  );
   const [increment, setIncrement] = useState(10);
   const [pot, setPot] = useState(0);
   const [raiseAmount, setRaiseAmount] = useState(0);
@@ -87,7 +91,16 @@ const Game = ({
 
   const foldHandler = async () => {
     // Handle fold action -> me surrender
-    await handleFold();
+    const res = await handleFold();
+    const winner = getWinner(
+      'Player 1',
+      'Player 2',
+      getHand(player1Deck, houseDeck) as Hand,
+      getHand(player2Deck, houseDeck) as Hand
+    );
+
+    setWinner(winner);
+    setGameOver(true);
   };
   const [restart, setRestart] = useState(false);
 
@@ -119,7 +132,6 @@ const Game = ({
         : 'Player 2'
     );
   }, [gameInfo]);
-
   useEffect(() => {
     setNumberOfTurns(Number(gameInfo?.field.numberOfTurns.value.value[1][1]));
     // if (numberOfTurns === 0) {
