@@ -64,6 +64,7 @@ export default function PokerShowdown({
   params: { competitionId: string };
 }) {
   const [gameState, setGameState] = useState(GameState.NotStarted);
+
   const [isRateGame, setIsRateGame] = useState<boolean>(true);
   const [loading, setLoading] = useState(true);
   const [loadingElement, setLoadingElement] = useState<
@@ -104,32 +105,21 @@ export default function PokerShowdown({
   useObserveLobbiesStore(query);
   const lobbiesStore = useLobbiesStore();
 
-  console.log('Active lobby', lobbiesStore.activeLobby);
+  const getPot: any = async (gameId: UInt64) => {
+    const pot: ProtoUInt64 | undefined = await query?.gameFund.get(
+      UInt64.from(gameId)
+    );
+    if (pot) {
+      const finalPot = pot.div(ProtoUInt64.from(1000000000));
+      return finalPot;
+    }
+  };
+  const callT = async () => {
+    if (matchQueue.gameInfo != undefined) {
+    }
+  };
 
-  
-
-const getPot: any = async (gameId : UInt64) => {
-  const pot : ProtoUInt64 | undefined = await query?.gameFund.get(UInt64.from(gameId));
-  if (pot) {
-    const finalPot = pot.div(ProtoUInt64.from(1000000000));
-    return finalPot;
-    
-  }
-}
-const callT = async () => {
-  if(matchQueue.gameInfo != undefined) {
-    console.log("THI", matchQueue.gameInfo?.gameId);
-    console.log('is query working1',await query?.gameFund.get(UInt64.from(matchQueue.gameInfo?.gameId)))
-    console.log("???????", getPot(matchQueue.gameInfo?.gameId));
-  }
-}
-
-
-
-
-
-
-callT();
+  callT();
   const restart = () => {
     matchQueue.resetLastGameState();
     setGameState(GameState.NotStarted);
@@ -161,15 +151,9 @@ callT();
       }
     );
 
-    console.log('Collect tx', tx);
-
     tx.transaction = tx.transaction?.sign(sessionPrivateKey);
 
-    console.log('Sending tx', tx);
-
     await tx.send();
-
-    console.log('Tx sent', tx);
   };
 
   // nonSSR
@@ -190,19 +174,21 @@ callT();
   };
 
   const handleCall = async () => {
-    const randzuLogic = client.runtime.resolve('RandzuLogic');
+    try {
+      const randzuLogic = client.runtime.resolve('RandzuLogic');
 
-    const tx = await client.transaction(
-      PublicKey.fromBase58(networkStore.address!),
-      async () => {
-        randzuLogic.call(
-          UInt64.from(matchQueue.gameInfo?.gameId)
-        );
-      }
-    );
+      const tx = await client.transaction(
+        PublicKey.fromBase58(networkStore.address!),
+        async () => {
+          randzuLogic.call(UInt64.from(matchQueue.gameInfo?.gameId));
+        }
+      );
 
-    await tx.sign();
-    await tx.send();
+      await tx.sign();
+      await tx.send();
+    } catch (error) {
+      toast.error(toasterStore, error as string);
+    }
   };
   const handleRaise = async (amount: number) => {
     const randzuLogic = client.runtime.resolve('RandzuLogic');
@@ -227,9 +213,7 @@ callT();
     const tx = await client.transaction(
       PublicKey.fromBase58(networkStore.address!),
       async () => {
-        randzuLogic.fold(
-          UInt64.from(matchQueue.gameInfo?.gameId)
-        );
+        randzuLogic.fold(UInt64.from(matchQueue.gameInfo?.gameId));
       }
     );
 
@@ -243,8 +227,8 @@ callT();
   }, [matchQueue.gameInfo?.isCurrentUserMove]);
 
   useEffect(() => {
+    console.log('<<<<<<<<<<<<<', matchQueue.lastGameState, '>>>>>>>>>>>>');
     if (matchQueue.pendingBalance && !matchQueue.inQueue) {
-      console.log('Collecting pending balance', matchQueue.pendingBalance);
       collectPending();
     }
     if (!walletInstalled()) {
@@ -333,22 +317,13 @@ callT();
   //   return `suit: ${card.suit.toString()}, rank: ${card.rank.toString()}`;
   // };
 
-  // console.log(">>>>>>>>>>>>", formatPubkey(matchQueue.gameInfo?.player2));
-  // console.log(">>>>>1234", matchQueue.gameInfo?.player1Deck);
+  //
+  //
   // const player1Cards = matchQueue.gameInfo?.field.player1Cards;
   // const player2Cards = matchQueue.gameInfo?.field.player2Cards;
   // const houseCards = matchQueue.gameInfo?.field.houseCards;
 
-  // console.log('>>>>>>>>>>>>12345', getCards(player1Cards));
-  // console.log('>>>>>>>>>>>>123456', getCards(player2Cards));
-  console.log('FFFFFFF>>>>>>>>>>>>12345678>', matchQueue.gameInfo?.currentMoveUser.toBase58());
-  console.log('FFFFFFF>>>>>>>>>>>>12345678>', matchQueue.gameInfo?.player1.toBase58());
-  console.log('FFFFFFF>>>>>>>>>>>>123456789>>', matchQueue.gameInfo?.currentUserIndex);
-  console.log('FFFFFFF>>>>>>>>>>>>123456789100', matchQueue.gameInfo?.field.increment.value.toString());
-
-
-
-  
+  //
 
   return (
     <GamePage gameConfig={pokerShowdownConfig} defaultPage={'Game'}>
@@ -538,7 +513,7 @@ callT();
                       />
                     </GameWrap>
                   )}
-                  {/* {gameState === GameState.OpponentTimeout && (
+                  {gameState === GameState.OpponentTimeout && (
                     <GameWrap>
                       <div
                         className={
@@ -591,15 +566,13 @@ callT();
                           onClick={() =>
                             proveOpponentTimeout()
                               .then(restart)
-                              .catch((error) => {
-                                console.log(error);
-                              })
+                              .catch((error) => {})
                           }
                           className={'px-4'}
                         />
                       </div>
                     </GameWrap>
-                  )} */}
+                  )}
                 </>
               )}
             </>
@@ -621,8 +594,7 @@ callT();
             gameState === GameState.OpponentTurn) && (
             <Game
               gameInfo={matchQueue.gameInfo}
-              matchInfo={matchQueue}
-              superIncrement={incrementPot}
+              setGameState={setGameState}
               handleCall={handleCall}
               handleRaise={handleRaise}
               handleFold={handleFold}
