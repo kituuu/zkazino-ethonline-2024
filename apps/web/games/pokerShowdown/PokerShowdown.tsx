@@ -192,6 +192,22 @@ export default function PokerShowdown({
     await tx.sign();
     await tx.send();
   };
+  const handleClaimFunds = async (winner: PublicKey) => {
+    const randzuLogic = client.runtime.resolve('RandzuLogic');
+
+    const tx = await client.transaction(
+      PublicKey.fromBase58(networkStore.address!),
+      async () => {
+        randzuLogic.declareWinner(
+          UInt64.from(matchQueue.gameInfo?.gameId),
+          winner
+        );
+      }
+    );
+
+    await tx.sign();
+    await tx.send();
+  };
 
   const handleFold = async () => {
     const randzuLogic = client.runtime.resolve('RandzuLogic');
@@ -235,7 +251,7 @@ export default function PokerShowdown({
         matchQueue.gameInfo?.lastMoveBlockHeight >
         MOVE_TIMEOUT_IN_BLOCKS
     ) {
-      setGameState(GameState.OpponentTimeout);
+      setGameState(GameState.OpponentTurn);
     } else if (
       matchQueue.activeGameId &&
       !matchQueue.gameInfo?.isCurrentUserMove
@@ -499,66 +515,6 @@ export default function PokerShowdown({
                       />
                     </GameWrap>
                   )}
-                  {gameState === GameState.OpponentTimeout && (
-                    <GameWrap>
-                      <div
-                        className={
-                          'flex max-w-[60%] flex-col items-center justify-center gap-6'
-                        }
-                      >
-                        <svg
-                          width="161"
-                          height="161"
-                          viewBox="0 0 161 161"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M80.442 160.884C124.869 160.884 160.884 124.869 160.884 80.442C160.884 36.0151 124.869 0 80.442 0C36.0151 0 0 36.0151 0 80.442C0 124.869 36.0151 160.884 80.442 160.884Z"
-                            fill="#212121"
-                          />
-                          <path
-                            d="M80.442 149.22C118.427 149.22 149.22 118.427 149.22 80.442C149.22 42.457 118.427 11.6641 80.442 11.6641C42.457 11.6641 11.6641 42.457 11.6641 80.442C11.6641 118.427 42.457 149.22 80.442 149.22Z"
-                            stroke="#EEE1B3"
-                            strokeWidth="8"
-                            strokeMiterlimit="10"
-                          />
-                          <path
-                            d="M52.8568 92.7354C56.0407 92.7354 58.6218 82.6978 58.6218 70.3157C58.6218 57.9337 56.0407 47.8961 52.8568 47.8961C49.6729 47.8961 47.0918 57.9337 47.0918 70.3157C47.0918 82.6978 49.6729 92.7354 52.8568 92.7354Z"
-                            fill="#EEE1B3"
-                          />
-                          <path
-                            d="M103.461 92.7354C106.645 92.7354 109.226 82.6978 109.226 70.3157C109.226 57.9337 106.645 47.8961 103.461 47.8961C100.277 47.8961 97.6963 57.9337 97.6963 70.3157C97.6963 82.6978 100.277 92.7354 103.461 92.7354Z"
-                            fill="#EEE1B3"
-                          />
-                          <path
-                            d="M135.489 76.4906H118.194V82.7178H135.489V76.4906Z"
-                            fill="#EEE1B3"
-                          />
-                          <path
-                            d="M38.7647 76.4906H21.4697V82.7178H38.7647V76.4906Z"
-                            fill="#EEE1B3"
-                          />
-                          <path
-                            d="M50.5391 116.29C54.8955 113.646 65.1452 108.224 79.293 108.034C93.6805 107.841 104.212 113.164 108.616 115.72"
-                            stroke="#EEE1B3"
-                            strokeWidth="5"
-                            strokeMiterlimit="10"
-                          />
-                        </svg>
-                        <span>Opponent timeout</span>
-                        <Button
-                          label={'Prove Opponent timeout'}
-                          onClick={() =>
-                            proveOpponentTimeout()
-                              .then(restart)
-                              .catch((error) => {})
-                          }
-                          className={'px-4'}
-                        />
-                      </div>
-                    </GameWrap>
-                  )}
                 </>
               )}
             </>
@@ -584,6 +540,7 @@ export default function PokerShowdown({
               handleCall={handleCall}
               handleRaise={handleRaise}
               handleFold={handleFold}
+              handleClaimFunds={handleClaimFunds}
               // onCellClicked={onCellClicked}
 
               // loadingElement={loadingElement}

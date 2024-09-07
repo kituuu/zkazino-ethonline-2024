@@ -27,6 +27,7 @@ interface IGameViewProps {
   handleCall: () => void;
   handleRaise: (amount: number) => void;
   handleFold: () => void;
+  handleClaimFunds: (amount: PublicKey) => void;
   // loadingElement: { x: number; y: number } | undefined;
   // loading: boolean;
 }
@@ -37,6 +38,7 @@ const Game = ({
   handleCall,
   handleRaise,
   handleFold,
+  handleClaimFunds,
 }: IGameViewProps) => {
   const currentUser = gameInfo?.currentUserIndex == 0 ? 'Player 1' : 'Player 2';
   // const currentUser = gameInfo?.currentMoveUser.equals(gameInfo?.player1) ? 'Player 1' : 'Player 2';
@@ -60,6 +62,7 @@ const Game = ({
   ) as Deck[];
   const [houseDeck, setHouseDeck] = useState<Deck[]>(saarepatte.slice(0, 3));
   const [winner, setWinner] = useState<string>('');
+  const [winnerPk, setWinnerPk] = useState<undefined | PublicKey>(undefined);
   const [player1Chips, setPlayer1Chips] = useState(
     (gameInfo?.field.player1Chips.value.toString() as number) / 1000000000
   );
@@ -100,10 +103,10 @@ const Game = ({
     );
 
     setWinner(winner);
+    setWinnerPk(winner == 'Player 1' ? gameInfo?.player1 : gameInfo?.player2);
     setGameOver(true);
   };
   const [restart, setRestart] = useState(false);
-
   useEffect(() => {
     setIncrement(
       (gameInfo?.field.increment.value.toString() as number) / 1000000000
@@ -164,6 +167,7 @@ const Game = ({
         getHand(player2Deck, houseDeck) as Hand
       );
       setWinner(winner);
+      setWinnerPk(winner == 'Player 1' ? gameInfo?.player1 : gameInfo?.player2);
       console.log(winner);
       console.log(currentUser);
       if (winner == 'Player 2') {
@@ -186,8 +190,24 @@ const Game = ({
     else if (!gameOver && currentUser === 'Player 2')
       setLocalHand(getHand(player2Deck, houseDeck) as string);
   }, [gameInfo?.field.numberOfTurns]);
+  console.log('samosa');
+  console.log(winnerPk?.toBase58());
+  console.log(address);
   return (
     <div className="game-bg noselect">
+      {gameOver &&
+        !gameInfo?.winner &&
+        winnerPk &&
+        winnerPk?.toBase58() == address && (
+          <button
+            className="rounded-lg bg-green-500 p-3"
+            onClick={() => {
+              handleClaimFunds(winnerPk);
+            }}
+          >
+            Claim Funds
+          </button>
+        )}
       <div className="game-board">
         asdfasjkdfhgjkasjkdg {winner}
         <Cards
