@@ -107,27 +107,24 @@ const Game = ({
     setGameOver(true);
   };
 
-  const checkEnough = async (increment : number) => {
-    const pid = ((gameInfo?.currentMoveUser.equals(gameInfo?.player1)) ? gameInfo?.field.player1Chips : gameInfo?.field.player2Chips)
+  const checkEnough = async (increment: number) => {
+    const pid = gameInfo?.currentMoveUser.equals(gameInfo?.player1)
+      ? gameInfo?.field.player1Chips
+      : gameInfo?.field.player2Chips;
     return (pid?.value.toString() as number) > increment;
-  }
-  
-
-
+  };
 
   const [restart, setRestart] = useState(false);
   useEffect(() => {
-    setIncrement(
-      (gameInfo?.field.increment.value.toString() as number) / 1000000000
-    );
+    setIncrement(Number(gameInfo?.field.increment.toBigInt()) / 1000000000);
     setPlayer1Chips(
-      (gameInfo?.field.player1Chips.value.toString() as number) / 1000000000
+      Number(gameInfo?.field.player1Chips.toBigInt()) / 1000000000
     );
     setPlayer2Chips(
-      (gameInfo?.field.player2Chips.value.toString() as number) / 1000000000
+      Number(gameInfo?.field.player2Chips.toBigInt()) / 1000000000
     );
-    setPot((gameInfo?.field.pot.value.toString() as number) / 1000000000);
-    setRaiseAmount(gameInfo?.field.player1Bet.value.toString());
+    setPot(Number(gameInfo?.field.pot.toBigInt()) / 1000000000);
+    setRaiseAmount(increment);
     setPlayer1Name(
       //matchInfo?.player1Name
       keyToPlayer[gameInfo?.player1?.toBase58() as string] || 'Player 1'
@@ -160,13 +157,13 @@ const Game = ({
     console.log(Number(numberOfTurns));
     console.log(numberOfTurns === 4);
     if (numberOfTurns === 2) {
-      setIncrement(gameInfo?.field.increment.value.toString() as number);
+      setIncrement(Number(gameInfo?.field.increment.toBigInt()) / 1000000000);
     } else if (numberOfTurns === 4) {
       setHouseDeck(saarepatte.slice(0, 4));
-      setIncrement(gameInfo?.field.increment.value.toString() as number);
+      setIncrement(Number(gameInfo?.field.increment.toBigInt()) / 1000000000);
     } else if (numberOfTurns === 6) {
       setHouseDeck(saarepatte);
-      setIncrement(gameInfo?.field.increment.value.toString() as number);
+      setIncrement(Number(gameInfo?.field.increment.toBigInt()) / 1000000000);
     } else if (numberOfTurns === 8) {
       setGameOver(true);
       const winner = getWinner(
@@ -193,7 +190,6 @@ const Game = ({
         }
       }
     }
-    
 
     if (!gameOver && currentUser === 'Player 1')
       setLocalHand(getHand(player1Deck, houseDeck) as string);
@@ -245,19 +241,36 @@ const Game = ({
                 disabled={gameInfo?.currentMoveUser.toBase58() != address}
                 onClick={() => callHandler()}
               >
+                {/* {(raiseAmount === 0 &&
+                  increment &&
+                  numberOfTurns < 2 &&
+                  `Buy In(${increment})`) ||
+                  (raiseAmount === 0 && increment && `Call(${increment})`) ||
+                  (raiseAmount > 0 && `Call(${raiseAmount})`) ||
+                  'Check'} */}
                 {(raiseAmount / 1000000000 === 0 &&
                   increment &&
                   numberOfTurns < 2 &&
-                  `Buy In(${increment / 1000000000})`) ||
+                  `Buy In(${increment})`) ||
                   (raiseAmount === 0 &&
-                    increment && ((((gameInfo?.currentMoveUser.equals(gameInfo?.player1)) ? gameInfo?.field.player1Chips : gameInfo?.field.player2Chips)?.value.toString() as number) > increment) &&
-                    `Call(${increment / 1000000000})`) ||
-                  (raiseAmount > 0 && `Call(${raiseAmount / 1000000000})`) ||
+                    increment &&
+                    (gameInfo?.currentMoveUser.toBase58() ==
+                    gameInfo?.player1.toBase58()
+                      ? Number(gameInfo?.field.player1Chips.toBigInt())
+                      : Number(gameInfo?.field.player2Chips.toBigInt())) /
+                      1000000000 >
+                      increment &&
+                    `Call(${increment})`) ||
+                  (raiseAmount > 0 && `Call(${raiseAmount})`) ||
                   'Check'}
               </button>
               <RaiseModal
                 minRaise={
-                  (raiseAmount > 0 ? raiseAmount : increment) / 1000000000
+                  (raiseAmount > 0 ? raiseAmount : increment) > 0
+                    ? (raiseAmount > 0 ? raiseAmount : increment) / 1000000000
+                    : raiseAmount > 0
+                      ? raiseAmount
+                      : increment
                 }
                 maxRaise={
                   currentUser === 'Player 1' ? player1Chips : player2Chips
@@ -279,6 +292,18 @@ const Game = ({
               </button>
             </>
           )}
+
+          {/* <p>
+            player1Chips {player1Chips}
+            player2Chips {player2Chips}
+            increment{' '}
+            {Number(gameInfo?.field.increment.toBigInt()) / 1000000000}
+            increment {increment}
+            raiseAmount {raiseAmount}
+            numberOfTurns {numberOfTurns}
+            1bet {Number(gameInfo?.field.player1Bet.toBigInt()) / 1000000000}
+            2bet {Number(gameInfo?.field.player2Bet.toBigInt()) / 1000000000}
+          </p> */}
 
           {gameOver && (
             <button
