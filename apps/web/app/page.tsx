@@ -84,7 +84,7 @@ export default function Home() {
               </Link> */}
             </div>
             <div className="flex w-full flex-col items-center lg:w-3/5">
-              <TextHoverEffect text="ZKasino" />
+              <TextHoverEffect text="ZKazino" />
               <HyperText
                 text="Spin, Deal, Prove - The Future of Fair Play"
                 className="md:text-3xl"
