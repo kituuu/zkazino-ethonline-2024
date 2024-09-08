@@ -178,7 +178,17 @@ const Game = ({
         winnerPk &&
         winnerPk?.toBase58() == address && (
           <button
-            className="rounded-lg bg-green-500 p-3"
+            className={cn(
+              'group flex w-full cursor-pointer items-center justify-center lg:w-auto',
+              'gap-[10px] rounded px-2 py-3 text-header-menu lg:py-1',
+              ' transition duration-75 ease-in',
+              ' lg:justify-normal',
+              'bg-left-accent lg:bg-right-accent',
+              'bg-right-accent text-black hover:opacity-80',
+              'border border-bg-dark text-bg-dark hover:border-right-accent hover:bg-bg-dark hover:text-right-accent lg:text-black',
+              'ml-[50%] -translate-x-[50%] p-4 text-2xl',
+              buttonDisabledStyle
+            )}
             onClick={() => {
               handleClaimFunds(winnerPk);
             }}
@@ -264,9 +274,9 @@ const Game = ({
                   'gap-[10px] rounded px-2 py-3 text-header-menu lg:py-1',
                   ' transition duration-75 ease-in',
                   ' lg:justify-normal',
-                  'bg-left-accent lg:bg-middle-accent',
-                  'bg-bg-dark text-foreground hover:opacity-80',
-                  'border border-bg-dark text-bg-dark hover:border-middle-accent hover:bg-bg-dark hover:text-middle-accent lg:text-foreground',
+                  ' bg-middle-accent',
+                  ' text-foreground hover:opacity-80',
+                  'border border-bg-dark  text-foreground hover:border-middle-accent hover:bg-bg-dark hover:text-middle-accent',
                   'p-4 text-2xl disabled:opacity-50'
                 )}
                 onClick={() => foldHandler()}
