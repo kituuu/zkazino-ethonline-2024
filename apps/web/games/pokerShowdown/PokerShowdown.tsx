@@ -229,7 +229,6 @@ export default function PokerShowdown({
   }, [matchQueue.gameInfo?.isCurrentUserMove]);
 
   useEffect(() => {
-    console.log('<<<<<<<<<<<<<', matchQueue.lastGameState, '>>>>>>>>>>>>');
     if (matchQueue.pendingBalance && !matchQueue.inQueue) {
       collectPending();
     }
@@ -309,23 +308,6 @@ export default function PokerShowdown({
         true
       );
   }, [gameState]);
-
-  // interface Card {
-  //   suit: number;
-  //   rank: number;
-  // }
-
-  // const cardToValue = (card: any) => {
-  //   return `suit: ${card.suit.toString()}, rank: ${card.rank.toString()}`;
-  // };
-
-  //
-  //
-  // const player1Cards = matchQueue.gameInfo?.field.player1Cards;
-  // const player2Cards = matchQueue.gameInfo?.field.player2Cards;
-  // const houseCards = matchQueue.gameInfo?.field.houseCards;
-
-  //
 
   return (
     <GamePage gameConfig={pokerShowdownConfig} defaultPage={'Game'}>
@@ -541,10 +523,6 @@ export default function PokerShowdown({
               handleRaise={handleRaise}
               handleFold={handleFold}
               handleClaimFunds={handleClaimFunds}
-              // onCellClicked={onCellClicked}
-
-              // loadingElement={loadingElement}
-              // loading={loading}
             />
           )}
         </GameWidget>

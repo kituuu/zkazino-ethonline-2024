@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
 
 interface RaiseModalProps {
@@ -6,7 +7,7 @@ interface RaiseModalProps {
   raiseHandler: (raise: number) => void;
   isDisabled: boolean;
 }
-
+const buttonDisabledStyle = 'disabled:opacity-50 disabled:cursor-not-allowed';
 const RaiseModal: React.FC<RaiseModalProps> = ({
   minRaise,
   maxRaise,
@@ -51,7 +52,17 @@ const RaiseModal: React.FC<RaiseModalProps> = ({
     <>
       <button
         onClick={toggleModal}
-        className="w-40 rounded-lg border-2 border-bg-dark bg-white px-4 py-2 text-black hover:bg-bg-grey hover:text-white disabled:opacity-50"
+        className={cn(
+          'group flex w-full cursor-pointer items-center justify-center lg:w-auto',
+          'gap-[10px] rounded px-2 py-3 text-header-menu lg:py-1',
+          ' transition duration-75 ease-in',
+          ' lg:justify-normal',
+          'bg-left-accent lg:bg-left-accent',
+          'bg-left-accent text-black hover:opacity-80',
+          'border border-bg-dark text-bg-dark hover:border-left-accent hover:bg-bg-dark hover:text-left-accent lg:text-black',
+          'p-4 text-2xl',
+          buttonDisabledStyle
+        )}
         disabled={isDisabled}
       >
         Raise
