@@ -143,7 +143,14 @@ export class RandzuLogic extends MatchMaker {
 
     gameInfo.field.pot = gameInfo.field.pot.add(amount);
     gameInfo.field.increment = amount;
-
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1bet');
+    console.log(gameInfo.field.player1Bet.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2bet');
+    console.log(gameInfo.field.player2Bet.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1chips');
+    console.log(gameInfo.field.player1Chips.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2chips');
+    console.log(gameInfo.field.player2Chips.value.value);
     const newPlayer1Chips = Provable.if(
       gameInfo.currentMoveUser.equals(gameInfo.player1),
       ProtoUInt64,
@@ -176,7 +183,14 @@ export class RandzuLogic extends MatchMaker {
       gameInfo.field.player2Bet,
     ) as ProtoUInt64;
     gameInfo.field.player2Bet = newPlayer2Bet;
-
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1bet new');
+    console.log(gameInfo.field.player1Bet.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2bet new');
+    console.log(gameInfo.field.player2Bet.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1chips new');
+    console.log(gameInfo.field.player1Chips.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2chips new');
+    console.log(gameInfo.field.player2Chips.value.value);
     gameInfo.currentMoveUser = Provable.if(
       gameInfo.currentMoveUser.equals(game.value.player1),
       gameInfo.player2,
@@ -203,13 +217,23 @@ export class RandzuLogic extends MatchMaker {
     assert(game.isSome, 'Invalid game id');
     assert(gameInfo.currentMoveUser.equals(sender), `Not your move`);
     assert(gameInfo.winner.equals(PublicKey.empty()), `Game finished`);
-    
-    const delta = Provable.if(
-      gameInfo.currentMoveUser.equals(gameInfo.player2),
-      ProtoUInt64,
-      gameInfo.field.player1Bet,
-      gameInfo.field.player2Bet,
-    ) as ProtoUInt64;
+
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1bet');
+    console.log(gameInfo.field.player1Bet.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2bet');
+    console.log(gameInfo.field.player2Bet.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1chips');
+    console.log(gameInfo.field.player1Chips.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2chips');
+    console.log(gameInfo.field.player2Chips.value.value);
+
+    // const delta = Provable.if(
+    //   gameInfo.currentMoveUser.equals(gameInfo.player2),
+    //   ProtoUInt64,
+    //   gameInfo.field.player1Bet,
+    //   gameInfo.field.player2Bet,
+    // ) as ProtoUInt64;
+    const delta = gameInfo.field.increment;
 
     gameInfo.field.pot = gameInfo.field.pot.add(delta);
 
@@ -227,6 +251,10 @@ export class RandzuLogic extends MatchMaker {
     ) as ProtoUInt64;
     gameInfo.field.player2Chips = newPlayer2Chips;
     gameInfo.field.player1Chips = newPlayer1Chips;
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 1chips new');
+    console.log(gameInfo.field.player1Chips.value.value);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>> 2chips new');
+    console.log(gameInfo.field.player2Chips.value.value);
     // console.log('hakuna');
     // console.log(typeof gameInfo.field.player2Chips);
     // console.log(gameInfo.field.player2Chips);
@@ -260,10 +288,6 @@ export class RandzuLogic extends MatchMaker {
     assert(
       gameInfo.winner.equals(PublicKey.empty()),
       'Winner already declared',
-    );
-    assert(
-      winner.equals(gameInfo.player1) || winner.equals(gameInfo.player2),
-      'Invalid winner',
     );
 
     gameInfo.winner = winner;
